@@ -57,6 +57,7 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
 .filepick{
   display:flex;
   align-items:center;
+  justify-content:center;
   gap:18px;
   min-height:64px;
   padding:8px 18px;
@@ -104,13 +105,15 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
 .hero{display:flex;gap:14px;align-items:center}.hero .hi{width:52px;height:52px;border-radius:14px;display:grid;place-items:center;flex:none;background:var(--acs);color:var(--ok)}.hero.okb{border-color:var(--ok)}.hero.wnb{border-color:var(--warn)}.hero.wnb .hi{color:var(--warn);background:var(--banbg)}.hero.badb{border-color:var(--bad)}.hero.badb .hi{color:var(--bad);background:var(--banbg)}
 input[type=file]{padding:6px}input[type=file]::file-selector-button{min-height:32px;margin-right:12px;border:0;border-radius:8px;background:var(--ac);color:var(--onac);padding:0 14px;font:inherit;font-weight:600;cursor:pointer}
 summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:600;color:var(--mut)}
-th:first-child,td:first-child{padding-left:14px}th:last-child,td:last-child{padding-right:14px}table.wd{font-size:14px}table.wd th,table.wd td{padding:9px 7px}.wr td:first-child{white-space:normal;min-width:0}.wr td.n{white-space:nowrap}td.em{text-align:center;padding:28px;color:var(--mut)}.sc.tall{max-height:70vh;overflow:auto}
+th:first-child,td:first-child{padding-left:14px}th:last-child,td:last-child{padding-right:14px}table.wd{font-size:14px}table.wd th,table.wd td{padding:9px 7px}.wr td:first-child{white-space:normal;min-width:0}.wr td.n{white-space:nowrap}td.em{text-align:centre;padding:28px;color:var(--mut)}.sc.tall{max-height:70vh;overflow:auto}
 @media(max-width:640px){.cv,.cv.tall{overflow:visible;max-height:none;background:none;border:0;box-shadow:none}.cv table,.cv tbody,.cv tr,.cv td{display:block}.cv thead{display:none}
  .cv tr{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:6px 14px;margin-bottom:10px;box-shadow:var(--sh)}.cv tbody tr:hover{background:var(--card)}
  .cv td{display:flex;justify-content:space-between;align-items:center;gap:14px;border:0;padding:5px 0;white-space:normal;text-align:right}.cv td::before{content:attr(data-l);color:var(--mut);font-size:13px;text-align:left;flex:none}
  .cv td[data-l=""]{justify-content:flex-start;font-weight:600}.cv td[data-l=""]::before{display:none}
+ .cv td.em{text-align:left;justify-content:flex-start;}
  .cv.k1 td:first-child{justify-content:flex-start;text-align:left;font-weight:650;font-size:15.5px}.cv.k1 td:first-child::before{display:none}
  .cv.k2 tr{display:flex;align-items:center;justify-content:space-between;gap:10px}.cv.k2 td{padding:5px 0}.cv.k2 td::before{display:none}.cv.k2 td:first-child{text-align:left;font-weight:600}.cv.k2 td[data-l=Share]{display:none}}
+ 
 
 .tr{display:flex;gap:8px;align-items:center;flex:none}
 #toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,16px);background:var(--tx);color:var(--bg);padding:10px 18px;border-radius:99px;font-weight:600;box-shadow:var(--sh);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:9;display:flex;gap:8px;align-items:center}#toast.on{opacity:1;transform:translate(-50%,0)}
@@ -595,7 +598,7 @@ function vOb(){const r=E.buildObligations(data).filter(o=>o.month===st.month);
 async function setPoolTo(v){data.settings=data.settings||{};data.settings.poolReceivablesTo=v;await save();render()}
 function vBal(){const B=E.balances(data,st.month),p=E.poolTracker(data,st.month),C=E.cardSummary(data,st.month);
  return `<h2>Tracked Balances</h2><div class="box" style="margin-bottom:10px"><label>Money owed to the NHDF Pool is Counted at</label><select onchange="setPoolTo(this.value)">${opts([['NSLC','NSLC (Default)'],['NHDF','NHDF']],(data.settings&&data.settings.poolReceivablesTo)||'NSLC')}</select></div>`+tbl(['Account','Opening','Spent Directly','Settlements Paid','Card Bills','Received','Balance','Receivables','Payables','Card Payable','Net Position'],E.TRACKED.map(a=>{const b=B[a];return [a,$$(b.opening),$$(b.direct),$$(b.settlementsPaid),$$(b.cardBillsPaid),$$(b.received),`<b>${$$(b.balance)}</b>`,$$(b.receivables),$$(b.payables),$$(b.cardPayable),`<b>${$$(b.netPosition)}</b>`]}))+
- (p?`<h2>NHDF Pool Tracker</h2>`+tbl(['Item','Amount'],[['NHDF FGS Pool Opening',$$(p.opening)],['NHDF - Paid Household',$$(-p.hhSpend)],['NHDF - Paid Personal',$$(-p.perSpend)],['Card Bills',$$(-p.cardBills)],['Transfers / Settlements Out',$$(-p.transfersOut)],['Money Received',$$(p.received)],['<b>Remaining Pool</b>',`<b>${$$(p.remaining)}</b>`],['Card Bills Not Yet Paid',$$(-p.cardsDue)],['<b>Headroom Under Cap</b>',`<b>${$$(p.headroom)}</b>`],['Personal Restoration Due',$$(p.restorationDue)],['Household Amounts Due',$$(p.householdDue)]],' wr')+`<div class="box" style="margin-top:8px"><div class="bar"><i class="${p.committedPct>100?'bad':p.committedPct>=90?'warn':''}" style="width:${Math.min(100,p.committedPct)}%"></i></div>Committed ${p.committedPct}% of ${$$(p.cap)}</div>`:'<p class="mut">Set a Budget for this month to see the Pool.</p>')+
+ (p?`<h2>NHDF Pool Tracker</h2>`+tbl(['Item','Amount'],[['NHDF FGS Pool Opening',$$(p.opening)],['NHDF - Paid Household',$$(-p.hhSpend)],['NHDF - Paid Personal',$$(-p.perSpend)],['Card Bills',$$(-p.cardBills)],['Transfers / Settlements Out',$$(-p.transfersOut)],['Money Received',$$(p.received)],['<b>Remaining Pool</b>',`<b>${$$(p.remaining)}</b>`],['Card Bills Not Yet Paid',$$(-p.cardsDue)],['<b>Headroom Under Cap</b>',`<b>${$$(p.headroom)}</b>`],['Personal Restoration Due',$$(p.restorationDue)],['Household Amounts Due',$$(p.householdDue)]],' wr')+`<div class="box" style="margin-top:8px"><div class="bar"><i class="${p.committedPct>100?'bad':p.committedPct>=90?'warn':''}" style="width:${Math.min(100,p.committedPct)}%"></i></div><div style="text-align:center">Committed ${p.committedPct}% of ${$$(p.cap)}</div>`:'<p class="mut">Set a Budget for this month to see the Pool.</p>')+
  `<h2>Card Bills</h2>`+cardTbl(C)}
 const cardTbl=C=>tbl(['Card','Household','Neo','Presha','Gross','Bills Paid','Outstanding'],E.CARDS.map(c=>[c,$$(C[c].household),$$(C[c].Neo),$$(C[c].Presha),$$(C[c].gross),C[c].tracksBill?$$(C[c].billsPaid):'\u2013',C[c].tracksBill?$$(C[c].outstanding):'Own Bill']));
 function vBud(){const m=st.month,b=data.budgets[m]||{alloc:{},carryIn:{},opening:{}},bl=E.bucketLedger({...data,budgets:{...data.budgets,[m]:{...b,alloc:b.alloc,carryIn:{}}}},m),cur=x=>x==null?'':plain(x);
