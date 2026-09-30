@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ExTracker</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0d6b5a">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<style>
+:root{--bg:#f2f4f1;--card:#fff;--tx:#14201d;--mut:#5c6b67;--bd:#dde3df;--ac:#0d6b5a;--onac:#fff;--acs:#e3f1ed;--ok:#14794f;--bad:#b83a22;--warn:#9a5b00;--neo:#3565c9;--pre:#b84f86;--sh:0 1px 2px rgba(20,32,29,.06),0 4px 14px rgba(20,32,29,.05);--c1:#0d6b5a;--c2:#3565c9;--c3:#d08a1c;--c4:#b84f86;--c5:#6b7fd7;--c6:#7a9a3a;--c7:#c4573a;--c8:#7b8794;--banbg:#fff4d6;--banbd:#efd489;--bantx:#5c4200;box-sizing:border-box;color-scheme:light dark}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0e1513;--card:#161f1c;--tx:#e6ede9;--mut:#93a39d;--bd:#26332f;--ac:#4cc6a6;--onac:#062019;--acs:#173029;--ok:#4fd39a;--bad:#ff8468;--warn:#f0b455;--neo:#7fa2ff;--pre:#f08ec0;--sh:0 1px 2px rgba(0,0,0,.4);--c1:#4cc6a6;--c2:#7fa2ff;--c3:#f0b455;--c4:#f08ec0;--c5:#a3b0ff;--c6:#a8cc5e;--c7:#ff9a7d;--c8:#a0acb8;--banbg:#3a2e12;--banbd:#6b5620;--bantx:#f6dfa2}}:root[data-theme=dark]{--bg:#0e1513;--card:#161f1c;--tx:#e6ede9;--mut:#93a39d;--bd:#26332f;--ac:#4cc6a6;--onac:#062019;--acs:#173029;--ok:#4fd39a;--bad:#ff8468;--warn:#f0b455;--neo:#7fa2ff;--pre:#f08ec0;--sh:0 1px 2px rgba(0,0,0,.4);--c1:#4cc6a6;--c2:#7fa2ff;--c3:#f0b455;--c4:#f08ec0;--c5:#a3b0ff;--c6:#a8cc5e;--c7:#ff9a7d;--c8:#a0acb8;--banbg:#3a2e12;--banbd:#6b5620;--bantx:#f6dfa2}:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box}body{margin:0;overflow-x:clip;background:var(--bg);color:var(--tx);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+.ic{flex:none;vertical-align:-4px}
+header{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:1px solid var(--bd);padding:env(safe-area-inset-top,0) 14px 0}
+.hd{max-width:1120px;margin:0 auto}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;min-width:0}
+.brand{display:flex;align-items:center;gap:10px;min-width:0;flex:1 1 auto}.brand>div:last-child{min-width:0}.brand b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.brand #lb{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mk{flex:none}.brand svg{color:var(--ac)}.brand b{font-size:20px;letter-spacing:-.01em;display:block;line-height:1.1}
+.mk{width:36px;height:36px;border-radius:10px;background:var(--acs);display:grid;place-items:center;color:var(--ac)}
+.top .mo{position:relative;display:flex;align-items:center;justify-content:space-between;gap:8px;width:118px;min-height:44px;padding:0 12px;border:1px solid var(--bd);border-radius:10px;background:var(--card);font-weight:550;white-space:nowrap}.top .mo:hover{border-color:var(--ac)}.top .mo svg{color:var(--mut);flex:none}.top .mo input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;padding:0;border:0}
+nav{display:flex;gap:4px;overflow-x:auto;padding:0 0 8px;scrollbar-width:none}nav::-webkit-scrollbar{display:none}
+nav button{flex:none;display:flex;align-items:center;gap:5px;border:0;background:transparent;color:var(--mut);border-radius:99px;padding:6px 9px;font-weight:550;font-size:14.5px}
+nav button:hover{background:var(--acs);color:var(--ac)}nav button.on{background:var(--ac);color:var(--onac)}
+main{max-width:1120px;margin:0 auto;padding:14px 14px calc(40px + env(safe-area-inset-bottom,0))}
+button,input,select,textarea{font:inherit;color:inherit;min-height:44px;border:1px solid var(--bd);border-radius:10px;background:var(--card);padding:6px 12px;transition:border-color .15s,background .15s,box-shadow .15s}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+button{cursor:pointer;font-weight:550}button:hover{border-color:var(--ac)}
+button.p{background:var(--ac);color:var(--onac);border-color:var(--ac)}button.d{color:var(--bad)}button.on{background:var(--ac);color:var(--onac);border-color:var(--ac)}
+input,select,textarea{width:100%}h2{margin:20px 0 10px;font-size:20px;letter-spacing:-.01em}h3{margin:0 0 12px;font-size:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+.g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:12px;margin-top:12px}
+.st,.box{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;box-shadow:var(--sh)}
+.st{position:relative}.st b{font-size:28px;font-weight:650;display:block;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.2;margin:2px 0}
+.si{position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:9px;background:var(--acs);color:var(--ac);display:grid;place-items:center}
+.sub{color:var(--mut);font-size:13px}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:1px}
+.mut{color:var(--mut);font-size:14px}.sc{overflow-x:auto;background:var(--card);border:1px solid var(--bd);border-radius:14px;box-shadow:var(--sh)}
+table{border-collapse:collapse;width:100%;font-size:15px}th,td{padding:10px 9px;border-bottom:1px solid var(--bd);text-align:left;white-space:nowrap}
+th{position:sticky;top:0;background:var(--card);color:var(--mut);font-size:13px;font-weight:600}tbody tr:hover{background:var(--acs)}tr:last-child td{border-bottom:0}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}label{display:block;font-size:14px;color:var(--mut);margin-bottom:3px;font-weight:550}
+.bar{height:12px;background:var(--bd);border-radius:8px;overflow:hidden}.bar i{display:block;height:100%;background:var(--ok);border-radius:8px;transition:width .5s ease}.bar i.bad{background:var(--bad)}.bar i.warn{background:var(--warn)}
+.tag{display:inline-block;padding:2px 10px;border-radius:99px;font-size:12.5px;font-weight:600;border:1px solid currentColor;background:color-mix(in srgb,currentColor 10%,transparent)}
+.SETTLED,.OK,.PASS{color:var(--ok)}.OPEN,.NEGATIVE,.OVER_SETTLED,.FAIL,.err{color:var(--bad)}.PARTIALLY_SETTLED,.wrn{color:var(--warn)}
+.ban{background:var(--banbg);color:var(--bantx);border-bottom:1px solid var(--banbd);padding:10px 14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center}.ban button{min-height:44px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:end;margin:8px 0}.row>*{flex:1 1 150px}.acts{display:flex;gap:6px}
+/* dashboard */
+.bk+.bk{margin-top:16px}.bh{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+.bn{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:6px;font-size:14px;font-variant-numeric:tabular-nums}
+.dn{display:flex;align-items:center;gap:16px;flex-wrap:wrap}.dw{position:relative;width:170px;height:170px;flex:none}.dw svg{width:100%;height:100%;transform:rotate(0deg)}
+.dc{position:absolute;inset:0;display:grid;place-content:center;text-align:center}.dc b{font-size:14px;font-variant-numeric:tabular-nums}
+.lg{list-style:none;margin:0;padding:0;flex:1 1 180px;font-size:14px}.lg li{display:flex;align-items:center;gap:8px;padding:4px 0}.lg li span{flex:1}.lg i{width:10px;height:10px;border-radius:3px;flex:none}.lg b{font-variant-numeric:tabular-nums;font-weight:600}.lg em{color:var(--mut);font-style:normal;width:44px;text-align:right}
+.gw{position:relative;max-width:260px;margin:0 auto}.gw svg{width:100%;display:block}.gc{position:absolute;left:0;right:0;bottom:2px;text-align:center}.gc b{font-size:28px;font-weight:650}
+.cr+.cr{margin-top:14px}.stk{display:flex;height:12px;border-radius:8px;overflow:hidden;background:var(--bd)}.stk i{display:block;min-width:0}.stk i+i{border-left:2px solid var(--card)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}.chips .tag{font-size:13.5px;padding:4px 12px}.chips .tag b{font-variant-numeric:tabular-nums;margin-right:4px}.chips .z{opacity:.45}
+.ow{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;padding:4px 0;font-size:14px}.ow .bar{height:8px}.ow b{font-variant-numeric:tabular-nums}
+.empty{text-align:center;padding:40px 16px;color:var(--mut)}.empty svg{color:var(--ac);margin-bottom:6px}.empty h2{color:var(--tx)}
+.filepick{
+  display:flex;
+  align-items:center;
+  gap:18px;
+  min-height:64px;
+  padding:8px 18px;
+  border:1px solid var(--bd);
+  border-radius:10px;
+  background:var(--card);
+  cursor:pointer;
+}
+
+.filepick span{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:48px;
+  padding:0 24px;
+  border-radius:10px;
+  background:var(--ac);
+  color:var(--onac);
+  font-weight:600;
+}
+
+.filepick input{
+  display:none;
+}
+@media(max-width:1139px){
+ nav{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--card);border-top:1px solid var(--bd);padding:6px 6px calc(6px + env(safe-area-inset-bottom,0));gap:2px;box-shadow:0 -4px 16px rgba(0,0,0,.06)}
+ nav button{flex-direction:column;gap:2px;min-width:72px;min-height:52px;padding:4px 5px;font-size:11px;border-radius:12px}
+ main{padding-bottom:calc(100px + env(safe-area-inset-bottom,0))}
+ nav button{flex:1 0 72px}
+}
+@media(max-width:759px){
+ .brand b{font-size:18px}.mk{width:32px;height:32px}.brand #lb{font-size:11px!important;overflow:hidden;text-overflow:ellipsis}.top .mo{width:118px;padding:010px;gap:6px}
+ .dn{flex-direction:column;justify-content:center}.dn .dw{margin:0 auto}.dn .lg{flex:none;width:100%}
+ .grid{grid-template-columns:1fr 1fr;gap:10px}.st{padding:12px}.st b{font-size:21px}.si{display:none}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
+.ib{min-width:44px;padding:0;display:grid;place-items:center}.ib.d:hover{border-color:var(--bad)}
+.amt{position:relative}.amt span{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--mut);pointer-events:none}.amt input{padding-left:28px}
+.pvw{background:var(--acs);border-color:transparent}.pt{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}.pt b{font-size:26px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.kv{display:flex;justify-content:space-between;gap:12px;padding:5px 0;border-top:1px solid color-mix(in srgb,var(--tx) 10%,transparent);font-size:14.5px}.kv span{color:var(--mut)}.kv b{font-weight:600;text-align:right}
+.ob2{display:flex;gap:8px;align-items:flex-start;margin-top:8px;padding:10px;border-radius:10px;background:var(--card);border:1px solid var(--bd)}.ob2 svg{margin-top:3px;color:var(--warn)}
+.msg{margin-top:8px;padding:8px 10px;border-radius:10px;background:var(--card);font-size:14.5px}.msg.err{border:1px solid var(--bad)}.msg.wrn{border:1px solid var(--warn)}
+.abar button{display:flex;align-items:center;justify-content:center;gap:8px}.abar .p{flex:2 1 220px}
+.hero{display:flex;gap:14px;align-items:center}.hero .hi{width:52px;height:52px;border-radius:14px;display:grid;place-items:center;flex:none;background:var(--acs);color:var(--ok)}.hero.okb{border-color:var(--ok)}.hero.wnb{border-color:var(--warn)}.hero.wnb .hi{color:var(--warn);background:var(--banbg)}.hero.badb{border-color:var(--bad)}.hero.badb .hi{color:var(--bad);background:var(--banbg)}
+input[type=file]{padding:6px}input[type=file]::file-selector-button{min-height:32px;margin-right:12px;border:0;border-radius:8px;background:var(--ac);color:var(--onac);padding:0 14px;font:inherit;font-weight:600;cursor:pointer}
+summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:600;color:var(--mut)}
+th:first-child,td:first-child{padding-left:14px}th:last-child,td:last-child{padding-right:14px}table.wd{font-size:14px}table.wd th,table.wd td{padding:9px 7px}.wr td:first-child{white-space:normal;min-width:0}.wr td.n{white-space:nowrap}td.em{text-align:center;padding:28px;color:var(--mut)}.sc.tall{max-height:70vh;overflow:auto}
+@media(max-width:640px){.cv,.cv.tall{overflow:visible;max-height:none;background:none;border:0;box-shadow:none}.cv table,.cv tbody,.cv tr,.cv td{display:block}.cv thead{display:none}
+ .cv tr{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:6px 14px;margin-bottom:10px;box-shadow:var(--sh)}.cv tbody tr:hover{background:var(--card)}
+ .cv td{display:flex;justify-content:space-between;align-items:center;gap:14px;border:0;padding:5px 0;white-space:normal;text-align:right}.cv td::before{content:attr(data-l);color:var(--mut);font-size:13px;text-align:left;flex:none}
+ .cv td[data-l=""]{justify-content:flex-start;font-weight:600}.cv td[data-l=""]::before{display:none}
+ .cv.k1 td:first-child{justify-content:flex-start;text-align:left;font-weight:650;font-size:15.5px}.cv.k1 td:first-child::before{display:none}
+ .cv.k2 tr{display:flex;align-items:center;justify-content:space-between;gap:10px}.cv.k2 td{padding:5px 0}.cv.k2 td::before{display:none}.cv.k2 td:first-child{text-align:left;font-weight:600}.cv.k2 td[data-l=Share]{display:none}}
+
+.tr{display:flex;gap:8px;align-items:center;flex:none}
+#toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,16px);background:var(--tx);color:var(--bg);padding:10px 18px;border-radius:99px;font-weight:600;box-shadow:var(--sh);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:9;display:flex;gap:8px;align-items:center}#toast.on{opacity:1;transform:translate(-50%,0)}
+@keyframes nw{from{box-shadow:inset 4px 0 0 var(--ac);background:var(--acs)}to{box-shadow:inset 4px 0 0 transparent}}tr.nw{animation:nw 2.6s ease-out}
+@media(max-width:1139px){#toast{bottom:calc(84px + env(safe-area-inset-bottom,0px))}}
+@media(max-width:640px){
+ .cv.tc tr{display:flex;flex-wrap:wrap;align-items:center;gap:2px 10px}
+ .cv.tc td{display:block;padding:0;order:6;text-align:left;font-size:13.5px;color:var(--mut)}.cv.tc td::before{display:none}.cv.tc td:empty{display:none}
+ .cv.tc td[data-l=ID]{order:1;font-weight:650;color:var(--tx)}.cv.tc td[data-l=Date]{order:2}
+ .cv.tc td[data-l=Amount]{order:3;margin-left:auto;font-size:18px;font-weight:650;color:var(--tx)}
+ .cv.tc td[data-l=Description],.cv.tc td[data-l=Type]{order:4;flex:1 1 100%;font-size:15.5px;font-weight:550;color:var(--tx);margin-top:4px}
+ .cv.tc td[data-l^=From]{order:5;flex:1 1 100%;color:var(--tx)}
+ .cv.tc td[data-l=""]{order:9;display:flex;gap:6px;margin:6px 0 2px auto;flex:none}
+}
+@media print{
+ :root,:root:not([data-theme=light]),:root[data-theme=dark]{--bg:#fff;--card:#fff;--tx:#111;--mut:#555;--bd:#ccc;--ac:#0d6b5a;--onac:#fff;--acs:#eef5f3;--ok:#14794f;--bad:#b83a22;--warn:#9a5b00;--sh:none;--c1:#0d6b5a;--c2:#3565c9;--c3:#d08a1c;--c4:#b84f86;--c5:#6b7fd7;--c6:#7a9a3a;--c7:#c4573a;--c8:#7b8794;color-scheme:light}
+ nav,.ban,#toast,.tr,.row,.abar,.si{display:none!important}.brand b::after{content:' \00B7  ' attr(data-m);font-weight:500;color:var(--mut)}header{position:static;border:0}main{max-width:none;padding:0}
+ .sc,.sc.tall{overflow:visible;max-height:none}.st,.box,.sc{box-shadow:none}table{font-size:12px}th{position:static}tr{break-inside:avoid}h2{break-after:avoid}
+}
+@media(prefers-reduced-motion:reduce){tr.nw{animation:none}}
+</style></head><body>
+<header><div class="hd"><div class="top"><div class="brand"><div class="mk"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></div><div><b>ExTracker</b><div id="lb" class="mut" style="font-size:12px"></div></div></div><div class="tr"><button id="thm" class="ib" type="button"></button><div class="mo"><span id="monl"></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><input type="month" id="mon" aria-label="Month"></div></div></div><nav id="nav" aria-label="Main"></nav></div></header>
+<div id="ban"></div>
+<main id="app"></main>
+<script>/* ExTracker derivation engine: pure functions, integer paise only. */
+(function (root) {
+'use strict';
+const CARDS = ['NSCC', 'PSCC', 'PUCC'], HH_CARDS = ['NSCC', 'PSCC'];
+const TRACKED = ['NSLC', 'NFDL', 'NHDF'];
+const BUCKETS = ['RENT', 'TRANSPORT_BILLS', 'FOOD_GROCERY_SHOPPING'];
+const CATEGORIES = {
+  'Rent': { type: 'HOUSEHOLD', bucket: 'RENT' },
+  'Transport': { type: 'HOUSEHOLD', bucket: 'TRANSPORT_BILLS' },
+  'Bills': { type: 'HOUSEHOLD', bucket: 'TRANSPORT_BILLS' },
+  'Food': { type: 'HOUSEHOLD', bucket: 'FOOD_GROCERY_SHOPPING' },
+  'Groceries': { type: 'HOUSEHOLD', bucket: 'FOOD_GROCERY_SHOPPING' },
+  'Shopping': { type: 'HOUSEHOLD', bucket: 'FOOD_GROCERY_SHOPPING' },
+  'Personal \u2013 Neo': { type: 'PERSONAL', bucket: 'PERSONAL' },
+  'Personal \u2013 Presha': { type: 'PERSONAL', bucket: 'PERSONAL' }
+};
+const OWN = { Neo: ['N811', 'NFPL'], Presha: ['P811', 'PPNB', 'PSLC', 'PUCC'] };
+const OBLIGATION_TYPES = ['REIMBURSEMENT', 'PERSONAL_SETTLEMENT', 'PERSONAL_CARD_RESTORATION', 'CROSS_SETTLEMENT'];
+const monthOf = d => String(d).slice(0, 7);
+const cf = (creditor, funds) => creditor === 'NHDF' ? (funds || 'HOUSEHOLD_POOL') : '';
+const sum = (a, f) => a.reduce((s, x) => s + f(x), 0);
+
+/* ---- money ---- */
+function parseRupees(str) { // "1,234.5" -> 123450 ; null if invalid
+  const m = String(str).replace(/[₹,\s]/g, '').match(/^(\d+)(?:\.(\d{1,2}))?$/);
+  return m ? parseInt(m[1], 10) * 100 + parseInt((m[2] || '').padEnd(2, '0') || '0', 10) : null;
+}
+function fmtINR(p) {
+  const neg = p < 0, a = Math.abs(p);
+  return (neg ? '-' : '') + '\u20B9' + new Intl.NumberFormat('en-IN').format(Math.trunc(a / 100)) + '.' + String(a % 100).padStart(2, '0');
+}
+const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const fmtDate = iso => iso.slice(8, 10) + '-' + MON[+iso.slice(5, 7) - 1] + '-' + iso.slice(0, 4);
+
+/* ---- transaction derivation ---- */
+function bucketOf(cat) { return (CATEGORIES[cat] || {}).bucket || null; }
+function fundingAccount(tx) {
+  const b = bucketOf(tx.category);
+  if (b === 'RENT') return 'NHDF';
+  if (b === 'TRANSPORT_BILLS') return 'NFDL';
+  if (b !== 'FOOD_GROCERY_SHOPPING') return null;
+  const p = tx.payerAccount;
+  if (HH_CARDS.includes(p) || (p === 'NHDF' && tx.nhdfMoneySource !== 'NEO_PERSONAL')) return 'NHDF';
+  return 'NSLC';
+}
+const fromNhdfPersonal = tx => tx.payerAccount === 'NHDF' && tx.nhdfMoneySource === 'NEO_PERSONAL';
+function person(tx) { return tx.beneficiary || ((CATEGORIES[tx.category] || {}).bucket === 'PERSONAL' ? tx.category.split('\u2013 ')[1] : ''); }
+
+function deriveTx(tx) {
+  const out = { bucket: bucketOf(tx.category), funding: null, treatment: 'NO_OBLIGATION', obligation: null, cardCharges: [], errors: [], warnings: [] };
+  const cat = CATEGORIES[tx.category], p = tx.payerAccount, amt = tx.amount;
+  if (!cat) { out.errors.push('Unknown category'); return out; }
+  const mk = (scope, bucket, debtor, creditor, funds, card) => ({ txId: tx.id, month: monthOf(tx.date), scope, bucket, debtor, creditor,
+    creditorFunds: cf(creditor, funds), sourceCard: card || '', amount: amt });
+  if (cat.type === 'HOUSEHOLD') {
+    out.funding = fundingAccount(tx);
+    const isCard = HH_CARDS.includes(p);
+    if (cat.bucket === 'RENT' && (isCard || p === 'PUCC')) { out.errors.push('Rent cannot be paid by a credit card'); return out; }
+    if (isCard) out.cardCharges.push({ card: p, kind: 'HOUSEHOLD', amount: amt });
+    else if (p === 'PUCC') out.cardCharges.push({ card: p, kind: 'HOUSEHOLD', amount: amt });
+    if (cat.bucket === 'FOOD_GROCERY_SHOPPING' && isCard) { out.treatment = 'CARD_CHARGE'; return out; }
+    if (cat.bucket === 'TRANSPORT_BILLS' && isCard) { // rule 4 (confirmed): NFDL owes the NHDF pool
+      out.treatment = 'CARD_CHARGE_POOL_DUE';
+      out.obligation = mk('HOUSEHOLD', cat.bucket, 'NFDL', 'NHDF', 'HOUSEHOLD_POOL', p); return out;
+    }
+    if (p === out.funding && !fromNhdfPersonal(tx)) return out;
+    out.treatment = 'HOUSEHOLD_REIMBURSEMENT';
+    out.obligation = mk('HOUSEHOLD', cat.bucket, out.funding, p, p === 'NHDF' ? tx.nhdfMoneySource : '');
+    return out;
+  }
+  const who = tx.beneficiary; out.funding = null;
+  if (p === 'PUCC') out.cardCharges.push({ card: p, kind: who, amount: amt });
+  if (HH_CARDS.includes(p)) out.cardCharges.push({ card: p, kind: who, amount: amt });
+  if (OWN[who] && (OWN[who].includes(p) || (who === 'Neo' && fromNhdfPersonal(tx)))) {
+    out.treatment = 'PERSONAL_SELF_PAID'; out.warnings.push('Paid from own account: not needed'); return out;
+  }
+  if (HH_CARDS.includes(p)) { out.treatment = 'PERSONAL_CC_RESTORATION'; out.obligation = mk('PERSONAL', 'PERSONAL', who, 'NHDF', 'HOUSEHOLD_POOL', p); return out; }
+  out.treatment = 'PERSONAL_REIMBURSEMENT';
+  out.obligation = mk('PERSONAL', 'PERSONAL', who, p, p === 'NHDF' ? tx.nhdfMoneySource : '');
+  return out;
+}
+
+function validateTx(tx) {
+  const e = [], w = [], cat = CATEGORIES[tx.category];
+  if (!tx.date) e.push('Date required'); if (!tx.expenseType) e.push('Type required');
+  if (!cat) e.push('Category required'); if (!tx.payerAccount) e.push('Payer required');
+  if (!Number.isInteger(tx.amount) || tx.amount <= 0) e.push('Amount must be > 0');
+  if (cat && cat.type !== tx.expenseType) e.push('Category does not match expense type');
+  if (tx.expenseType === 'PERSONAL' && !['Neo', 'Presha'].includes(tx.beneficiary)) e.push('Beneficiary required for PERSONAL');
+  if (tx.expenseType === 'HOUSEHOLD' && tx.beneficiary) e.push('Beneficiary not allowed for HOUSEHOLD');
+  if (tx.payerAccount === 'NHDF' && !['HOUSEHOLD_POOL', 'NEO_PERSONAL'].includes(tx.nhdfMoneySource)) e.push('Money source required when payer is NHDF');
+  if (tx.date && cat) { const d = deriveTx(tx); e.push(...d.errors); w.push(...d.warnings); }
+  return { errors: e, warnings: w };
+}
+
+/* ---- settlements ---- */
+const scopeOfS = s => s.bucket === 'PERSONAL' ? 'PERSONAL' : 'HOUSEHOLD';
+const partyOf = (acct, funds) => ['NSLC', 'NFDL', 'NSCC', 'PSCC'].includes(acct) ? 'HOUSEHOLD'
+  : acct === 'NHDF' ? (funds === 'NEO_PERSONAL' ? 'Neo' : 'HOUSEHOLD')
+  : OWN.Neo.includes(acct) ? 'Neo' : OWN.Presha.includes(acct) ? 'Presha' : acct;
+const partyOfDebtor = s => (s.debtor === 'Neo' || s.debtor === 'Presha') ? s.debtor : partyOf(s.debtor);
+
+function validateSettlement(s) {
+  const e = [], w = [];
+  if (!s.date) e.push('Date required'); if (!s.type) e.push('Type required');
+  if (!Number.isInteger(s.amount) || s.amount <= 0) e.push('Amount must be > 0');
+  if (s.receiverAccount && CARDS.includes(s.receiverAccount)) e.push('Receiver cannot be a credit card');
+  if (OBLIGATION_TYPES.includes(s.type)) {
+    if (scopeOfS(s) === 'PERSONAL' && !['Neo', 'Presha'].includes(s.debtor)) e.push('Personal settlements need a debtor person');
+    if (scopeOfS(s) === 'HOUSEHOLD' && (!s.bucket || !s.debtor)) e.push('Household settlements need a bucket and debtor');
+    if (!s.originalCreditor) e.push('Original creditor required');
+  }
+  if (s.type === 'CARD_BILL_PAYMENT' && (!s.paidByAccount || !CARDS.includes(s.originalCreditor))) e.push('Card bill needs paid-by account and a card');
+  if (s.type === 'TRANSFER' && (!s.paidByAccount || !s.receiverAccount)) e.push('Transfer needs paid-by and receiver');
+  return { errors: e, warnings: w };
+}
+function checkPairs(settlements) { // per party, amount owed as debtor must equal amount owed to it as creditor
+  const g = {};
+  settlements.filter(s => s.pairId).forEach(s => (g[s.pairId] = g[s.pairId] || []).push(s));
+  return Object.entries(g).map(([pairId, rows]) => {
+    const net = {};
+    rows.forEach(s => {
+      const d = partyOfDebtor(s), c = partyOf(s.originalCreditor, cf(s.originalCreditor, s.creditorFunds));
+      net[d] = (net[d] || 0) + s.amount; net[c] = (net[c] || 0) - s.amount;
+    });
+    const debtorSide = sum(rows, s => s.amount);
+    return { pairId, count: rows.length, total: debtorSide, net, balanced: Object.values(net).every(v => v === 0) };
+  });
+}
+
+/* ---- obligations ---- */
+const gkey = o => [o.month, o.scope, o.bucket, o.debtor, o.creditor, o.creditorFunds || ''].join('|');
+function buildObligations(data) {
+  const groups = new Map();
+  const ensure = o => { const k = gkey(o); if (!groups.has(k)) groups.set(k, { key: k, month: o.month, scope: o.scope, bucket: o.bucket, debtor: o.debtor,
+    creditor: o.creditor, creditorFunds: o.creditorFunds || '', sourceCards: [], obligation: 0, settled: 0, txIds: [], settlementIds: [] }); return groups.get(k); };
+  data.transactions.forEach(t => { const o = deriveTx(t).obligation; if (!o) return;
+    const g = ensure(o); g.obligation += o.amount; g.txIds.push(t.id); if (o.sourceCard && !g.sourceCards.includes(o.sourceCard)) g.sourceCards.push(o.sourceCard); });
+  data.settlements.filter(s => OBLIGATION_TYPES.includes(s.type)).forEach(s => {
+    const g = ensure({ month: monthOf(s.date), scope: scopeOfS(s), bucket: s.bucket, debtor: s.debtor, creditor: s.originalCreditor, creditorFunds: cf(s.originalCreditor, s.creditorFunds) });
+    g.settled += s.amount; g.settlementIds.push(s.id); });
+  return [...groups.values()].map(g => {
+    g.outstanding = Math.max(0, g.obligation - g.settled); g.overSettled = Math.max(0, g.settled - g.obligation);
+    g.status = g.overSettled > 0 ? 'OVER_SETTLED' : g.settled === 0 ? 'OPEN' : g.outstanding === 0 ? 'SETTLED' : 'PARTIALLY_SETTLED';
+    return g; }).sort((a, b) => a.key < b.key ? -1 : 1);
+}
+
+/* ---- cards ---- */
+function cardSummary(data, month) {
+  const res = {};
+  CARDS.forEach(c => res[c] = { card: c, household: 0, Neo: 0, Presha: 0, gross: 0, billsPaid: 0, outstanding: 0, tracksBill: HH_CARDS.includes(c) });
+  data.transactions.forEach(t => { if (monthOf(t.date) > month) return; deriveTx(t).cardCharges.forEach(cc => {
+    const r = res[cc.card]; r.outstanding += cc.amount; if (monthOf(t.date) === month) { r.gross += cc.amount; r[cc.kind === 'HOUSEHOLD' ? 'household' : cc.kind] += cc.amount; } }); });
+  data.settlements.forEach(s => { if (s.type !== 'CARD_BILL_PAYMENT' || monthOf(s.date) > month) return;
+    const r = res[s.originalCreditor]; if (!r) return; r.outstanding -= s.amount; if (monthOf(s.date) === month) r.billsPaid += s.amount; });
+  CARDS.forEach(c => { if (!res[c].tracksBill) res[c].outstanding = null; }); // PUCC bill is Presha's own
+  return res;
+}
+
+/* ---- budget / buckets ---- */
+function prevMonth(m) { let y = +m.slice(0, 4), n = +m.slice(5, 7) - 1; if (n === 0) { y--; n = 12; } return y + '-' + String(n).padStart(2, '0'); }
+function bucketLedger(data, month, _depth) {
+  const b = data.budgets[month], depth = _depth || 0;
+  return BUCKETS.map(k => {
+    const alloc = b ? b.alloc[k] || 0 : 0;
+    let carry = b && b.carryIn && b.carryIn[k] != null ? b.carryIn[k] : 0;
+    if ((!b || !b.carryIn || b.carryIn[k] == null) && depth < 36 && data.budgets[prevMonth(month)]) carry = bucketLedger(data, prevMonth(month), depth + 1).find(x => x.bucket === k).remaining;
+    const spent = sum(data.transactions.filter(t => t.expenseType === 'HOUSEHOLD' && monthOf(t.date) === month && bucketOf(t.category) === k), t => t.amount);
+    const available = alloc + carry, remaining = available - spent;
+    return { bucket: k, alloc, carry, available, spent, remaining, status: remaining < 0 ? 'NEGATIVE' : 'OK' };
+  });
+}
+
+/* ---- balances and pool ---- */
+const hitsTracked = t => !fromNhdfPersonal(t); // Neo's untracked savings are outside NHDF's tracked balance
+function balances(data, month) {
+  const b = data.budgets[month], obs = buildObligations(data).filter(o => o.month === month), cards = cardSummary(data, month), res = {};
+  const poolTo = data.settings && data.settings.poolReceivablesTo === 'NHDF' ? 'NHDF' : 'NSLC';
+  const isPool = o => o.creditor === 'NHDF' && o.creditorFunds === 'HOUSEHOLD_POOL', credAcct = o => isPool(o) ? poolTo : o.creditor;
+  TRACKED.forEach(a => {
+    const opening = b ? b.opening[a] || 0 : 0;
+    const direct = sum(data.transactions.filter(t => monthOf(t.date) === month && t.payerAccount === a && hitsTracked(t)), t => t.amount);
+    const inM = data.settlements.filter(s => monthOf(s.date) === month);
+    const paid = sum(inM.filter(s => s.paidByAccount === a && s.type !== 'CARD_BILL_PAYMENT'), s => s.amount);
+    const bills = sum(inM.filter(s => s.paidByAccount === a && s.type === 'CARD_BILL_PAYMENT'), s => s.amount);
+    const received = sum(inM.filter(s => s.receiverAccount === a), s => s.amount);
+    const balance = opening - direct - paid - bills + received;
+    const recv = sum(obs.filter(o => credAcct(o) === a && (a !== 'NHDF' || o.creditorFunds !== 'NEO_PERSONAL') && o.debtor !== a), o => o.outstanding);
+    const pay = sum(obs.filter(o => o.debtor === a && credAcct(o) !== a), o => o.outstanding);
+    const cardDue = a === 'NHDF' ? Math.max(0, cards.NSCC.outstanding) + Math.max(0, cards.PSCC.outstanding) : 0;
+    res[a] = { account: a, opening, direct, settlementsPaid: paid, cardBillsPaid: bills, received, balance, receivables: recv, payables: pay, cardPayable: cardDue, netPosition: balance + recv - pay - cardDue };
+  });
+  return res;
+}
+function poolTracker(data, month) {
+  const b = data.budgets[month]; if (!b) return null;
+  const inM = data.transactions.filter(t => monthOf(t.date) === month && t.payerAccount === 'NHDF' && hitsTracked(t) && bucketOf(t.category) !== 'RENT');
+  const sets = data.settlements.filter(s => monthOf(s.date) === month);
+  const opening = b.opening.NHDF - (b.alloc.RENT || 0);
+  const hhSpend = sum(inM.filter(t => t.expenseType === 'HOUSEHOLD'), t => t.amount);
+  const perSpend = sum(inM.filter(t => t.expenseType === 'PERSONAL'), t => t.amount);
+  const bills = sum(sets.filter(s => s.type === 'CARD_BILL_PAYMENT' && s.paidByAccount === 'NHDF'), s => s.amount);
+  const out = sum(sets.filter(s => s.type !== 'CARD_BILL_PAYMENT' && s.paidByAccount === 'NHDF'), s => s.amount);
+  const received = sum(sets.filter(s => s.receiverAccount === 'NHDF'), s => s.amount);
+  const remaining = opening - hhSpend - perSpend - bills - out + received, used = opening - remaining;
+  const cs = cardSummary(data, month), cardsDue = Math.max(0, cs.NSCC.outstanding) + Math.max(0, cs.PSCC.outstanding), committed = used + cardsDue;
+  const cap = data.settings && data.settings.cardPoolCap != null ? data.settings.cardPoolCap : opening;
+  const due = buildObligations(data).filter(o => o.month === month && o.creditor === 'NHDF' && o.creditorFunds === 'HOUSEHOLD_POOL');
+  return { opening, hhSpend, perSpend, cardBills: bills, transfersOut: out, received, remaining, used, cap, gaugePct: cap > 0 ? Math.round(used * 1000 / cap) / 10 : 0, cardsDue, committed, headroom: cap - committed, committedPct: cap > 0 ? Math.round(committed * 1000 / cap) / 10 : 0,
+    restorationDue: sum(due.filter(o => o.scope === 'PERSONAL'), o => o.outstanding), householdDue: sum(due.filter(o => o.scope === 'HOUSEHOLD'), o => o.outstanding) };
+}
+
+/* ---- dashboard summary ---- */
+function summary(data, month) {
+  const tx = data.transactions.filter(t => monthOf(t.date) === month), obs = buildObligations(data).filter(o => o.month === month), open = obs.filter(o => o.outstanding > 0);
+  const by = (arr, k) => arr.reduce((m, o) => (m[o[k]] = (m[o[k]] || 0) + o.outstanding, m), {});
+  const cards = cardSummary(data, month);
+  return {
+    txCount: tx.length, txTotal: sum(tx, t => t.amount),
+    household: sum(tx.filter(t => t.expenseType === 'HOUSEHOLD'), t => t.amount),
+    personal: sum(tx.filter(t => t.expenseType === 'PERSONAL'), t => t.amount),
+    personalBy: { Neo: sum(tx.filter(t => t.beneficiary === 'Neo'), t => t.amount), Presha: sum(tx.filter(t => t.beneficiary === 'Presha'), t => t.amount) },
+    byCategory: tx.reduce((m, t) => (m[t.category] = (m[t.category] || 0) + t.amount, m), {}),
+    cards, cardGross: sum(HH_CARDS, c => cards[c].gross), cardOutstanding: sum(HH_CARDS, c => Math.max(0, cards[c].outstanding)),
+    openCount: open.length, openAmount: sum(open, o => o.outstanding), overSettledCount: obs.filter(o => o.status === 'OVER_SETTLED').length,
+    outstandingByDebtor: by(open, 'debtor'), outstandingByCreditor: by(open, 'creditor'),
+    buckets: bucketLedger(data, month), balances: balances(data, month), pool: poolTracker(data, month)
+  };
+}
+
+/* ---- export / import (JSON) ---- */
+const SCHEMA_VERSION = 1;
+function exportJSON(data, now) { return JSON.stringify({ app: 'ExTracker', schemaVersion: SCHEMA_VERSION, exportedAt: now || new Date().toISOString(),
+  transactions: data.transactions, settlements: data.settlements, budgets: data.budgets, settings: data.settings }, null, 1); }
+function parseImport(text) {
+  let o; try { o = JSON.parse(text); } catch (e) { return { error: 'Not valid JSON' }; }
+  if (!o || o.app !== 'ExTracker') return { error: 'Not an ExTracker export' };
+  if (o.schemaVersion > SCHEMA_VERSION) return { error: 'Export is from a newer version' };
+  if (!Array.isArray(o.transactions) || !Array.isArray(o.settlements) || typeof o.budgets !== 'object') return { error: 'Missing sections' };
+  const bad = o.transactions.filter(t => !Number.isInteger(t.amount)).length + o.settlements.filter(s => !Number.isInteger(s.amount)).length;
+  if (bad) return { error: bad + ' record(s) have non-integer paise amounts' };
+  return { data: { transactions: o.transactions, settlements: o.settlements, budgets: o.budgets, settings: o.settings || {} },
+    counts: { transactions: o.transactions.length, settlements: o.settlements.length, budgets: Object.keys(o.budgets).length } };
+}
+
+const api = { CARDS, TRACKED, BUCKETS, CATEGORIES, OWN, parseRupees, fmtINR, fmtDate, monthOf, bucketOf, fundingAccount, deriveTx, validateTx, validateSettlement,
+  checkPairs, buildObligations, cardSummary, bucketLedger, balances, poolTracker, summary, exportJSON, parseImport, SCHEMA_VERSION };
+if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.ExEngine = api;
+})(typeof self !== 'undefined' ? self : this);
+</script>
+<script>/* Section 13 acceptance tests. Reused later as the in-app Self-check panel. */
+(function (root) {
+function run(E, live) {
+  const R = [], ck = (name, ok, detail) => R.push({ name, ok: !!ok, detail: detail || '' });
+  const M = '2026-09', $ = p => E.fmtINR(p), eq = (n, a, b) => ck(n, a === b, $(a) + (a === b ? '' : ' (expected ' + $(b) + ')'));
+  const mo = x => String(x.date).slice(0, 7) === M, lb = live.budgets || {};
+  const seed = { transactions: live.transactions.filter(mo), settlements: live.settlements.filter(mo), budgets: lb[M] ? { [M]: lb[M] } : {}, settings: live.settings || {} };
+  const hasSep = seed.transactions.length === 81 && seed.settlements.length === 14 && !!lb[M];
+  const S = E.summary(seed, M), obs = E.buildObligations(seed), cards = S.cards, P = x => Math.round(x * 100);
+  if (hasSep) {
+  ck('81 transactions', S.txCount === 81, S.txCount);
+  eq('Total transactions', S.txTotal, P(26654.21));
+  eq('Household total', S.household, P(20024.21));
+  const cat = c => S.byCategory[c] || 0, sumc = l => l.reduce((s, c) => s + cat(c), 0);
+  eq('Rent', cat('Rent'), P(6800)); eq('Transport + Bills', sumc(['Transport', 'Bills']), P(2135));
+  eq('Food + Groceries + Shopping', sumc(['Food', 'Groceries', 'Shopping']), P(11089.21));
+  eq('Personal total', S.personal, P(6630)); eq('Personal Neo', S.personalBy.Neo, P(4810)); eq('Personal Presha', S.personalBy.Presha, P(1820));
+  eq('NSCC gross', cards.NSCC.gross, P(2028.75)); eq('NSCC household', cards.NSCC.household, P(2028.75));
+  eq('PSCC gross', cards.PSCC.gross, P(1906.04)); eq('PSCC household', cards.PSCC.household, P(762.04));
+  eq('PSCC Presha', cards.PSCC.Presha, P(995)); eq('PSCC Neo', cards.PSCC.Neo, P(149));
+  eq('Card charges total', S.cardGross, P(3934.79)); eq('Card payable outstanding', S.cardOutstanding, 0);
+  const o = (sc, d, c, m) => obs.filter(x => x.month === M && x.scope === sc && x.debtor === d && x.creditor === c && (!m || x.bucket === m));
+  const one = (n, sc, d, c, amt) => { const g = o(sc, d, c); ck(n, g.length === 1 && g[0].obligation === P(amt) && g[0].status === 'SETTLED', g.map(x => $(x.obligation) + ' ' + x.status).join(', ') || 'missing'); };
+  one('HH NSLC->P811 5,150.39', 'HOUSEHOLD', 'NSLC', 'P811', 5150.39); one('HH NSLC->PSLC 579', 'HOUSEHOLD', 'NSLC', 'PSLC', 579); one('HH NFDL->PUCC 140', 'HOUSEHOLD', 'NFDL', 'PUCC', 140);
+  eq('HH obligations total', sum(obs.filter(x => x.scope === 'HOUSEHOLD'), 'obligation'), P(5869.39));
+  one('Neo->P811 4,611', 'PERSONAL', 'Neo', 'P811', 4611); one('Neo->PSLC 50', 'PERSONAL', 'Neo', 'PSLC', 50); one('Neo->NHDF 149', 'PERSONAL', 'Neo', 'NHDF', 149);
+  one('Presha->N811 265', 'PERSONAL', 'Presha', 'N811', 265); one('Presha->NHDF 1,555', 'PERSONAL', 'Presha', 'NHDF', 1555);
+  ck('Presha->NHDF split: 995 via PSCC + 560 direct', (() => { const t = seed.transactions.filter(x => x.beneficiary === 'Presha' && (x.payerAccount === 'PSCC' || x.payerAccount === 'NHDF')); return sum(t.filter(x => x.payerAccount === 'PSCC'), 'amount') === P(995) && sum(t.filter(x => x.payerAccount === 'NHDF'), 'amount') === P(560); })());
+  ck('Open obligations = 0', S.openCount === 0, S.openCount); eq('Total outstanding', S.openAmount, 0);
+  ck('No OVER_SETTLED rows', obs.every(x => x.status !== 'OVER_SETTLED')); ck('All groups SETTLED', obs.every(x => x.status === 'SETTLED'), obs.length + ' groups');
+  ck('Cross-settlement pairs balanced', E.checkPairs(seed.settlements).every(p => p.balanced), E.checkPairs(seed.settlements).map(p => p.pairId + ':' + (p.balanced ? 'ok' : 'MISMATCH')).join(' '));
+  ['NSLC', 'NFDL', 'NHDF'].forEach(a => eq(a + ' end balance', S.balances[a].balance, 0));
+  eq('NHDF pool opening', S.pool.opening, P(6320.06)); eq('NHDF pool remaining (fully used)', S.pool.remaining, 0);
+  eq('Pool identity: remaining = NHDF balance - unspent rent', S.pool.remaining, S.balances.NHDF.balance - (seed.budgets[M].alloc.RENT - 680000));
+  S.buckets.forEach(b => ck('Bucket ' + b.bucket + ' remaining 0, OK', b.remaining === 0 && b.status === 'OK', $(b.remaining) + ' ' + b.status));
+  } else R.push({ name: 'September 2026 acceptance tests', ok: null, detail: 'Skipped: import the September 2026 file (81 transactions, 14 settlements) to run them' });
+  ck('Every transaction validates', live.transactions.every(t => E.validateTx(t).errors.length === 0), live.transactions.filter(t => E.validateTx(t).errors.length).map(t => t.id).join(','));
+  ck('Every settlement validates', live.settlements.every(s => E.validateSettlement(s).errors.length === 0));
+  ck('All amounts are integers', [...live.transactions, ...live.settlements].every(x => Number.isInteger(x.amount)));
+  const rt = E.parseImport(E.exportJSON(live, 'x'));
+  ck('Export/import round-trip identical', !rt.error && JSON.stringify(rt.data) === JSON.stringify({ transactions: live.transactions, settlements: live.settlements, budgets: lb, settings: live.settings || {} }), rt.error || '');
+  const rt2 = E.summary(rt.data, M); ck('Round-trip derives identical summary', JSON.stringify(rt2) === JSON.stringify(E.summary(live, M)));
+  ck('Rent by card is rejected', E.validateTx({ id: 'X', date: '2026-10-02', expenseType: 'HOUSEHOLD', category: 'Rent', amount: 100, payerAccount: 'NSCC', beneficiary: '' }).errors.length > 0);
+  const tb = E.deriveTx({ id: 'X', date: '2026-10-02', expenseType: 'HOUSEHOLD', category: 'Bills', amount: 5000, payerAccount: 'PSCC', beneficiary: '' });
+  ck('Bills by PSCC: card charge + NFDL owes NHDF pool', tb.cardCharges.length === 1 && tb.obligation && tb.obligation.debtor === 'NFDL' && tb.obligation.creditor === 'NHDF' && tb.obligation.creditorFunds === 'HOUSEHOLD_POOL' && tb.obligation.sourceCard === 'PSCC');
+  ck('Self-paid personal warns', E.deriveTx({ id: 'X', date: '2026-10-02', expenseType: 'PERSONAL', category: 'Personal \u2013 Neo', amount: 100, payerAccount: 'N811', beneficiary: 'Neo' }).warnings.length === 1);
+  ck('Zero balance is OK, never NEGATIVE (-0 / residue)', E.bucketLedger({ budgets: { '2026-10': { alloc: { RENT: 0, TRANSPORT_BILLS: 0, FOOD_GROCERY_SHOPPING: 1108921 }, carryIn: { RENT: 0, TRANSPORT_BILLS: 0, FOOD_GROCERY_SHOPPING: 0 } } },
+    transactions: [{ id: 'a', date: '2026-10-03', expenseType: 'HOUSEHOLD', category: 'Food', amount: 1108921, payerAccount: 'NSLC', beneficiary: '' }] }, '2026-10')[2].status === 'OK');
+  ck('Rupee parsing/formatting', E.parseRupees('1,23,456.7') === 12345670 && E.fmtINR(123456789) === '\u20B912,34,567.89' && E.fmtDate('2026-09-05') === '05-Sep-2026');
+  return R;
+}
+function sum(a, k) { return a.reduce((s, x) => s + x[k], 0); }
+if (typeof module !== 'undefined' && module.exports) module.exports = { run }; else root.ExSelfCheck = { run };
+})(typeof self !== 'undefined' ? self : this);
+</script>
+<script>/* Pure helpers: merge (imported record wins) and CSV. */
+(function (root) {
+const sj = v => v && typeof v === 'object' ? (Array.isArray(v) ? '[' + v.map(sj) + ']' : '{' + Object.keys(v).sort().map(k => JSON.stringify(k) + ':' + sj(v[k])) + '}') : JSON.stringify(v);
+const same = (a, b) => sj(a) === sj(b);
+function mergeData(cur, inc) {
+  const out = { transactions: [], settlements: [], budgets: {}, settings: Object.keys(cur.settings || {}).length ? cur.settings : (inc.settings || {}) };
+  const added = { transactions: 0, settlements: 0, budgets: 0 }, identical = { transactions: 0, settlements: 0, budgets: 0 }, conflicts = [];
+  ['transactions', 'settlements'].forEach(k => {
+    const m = new Map(cur[k].map(x => [x.id, x]));
+    inc[k].forEach(x => { const o = m.get(x.id); if (!o) added[k]++; else if (same(o, x)) identical[k]++; else conflicts.push({ kind: k, id: x.id, cur: o, inc: x }); m.set(x.id, x); });
+    out[k] = [...m.values()].sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
+  });
+  out.budgets = Object.assign({}, cur.budgets);
+  Object.keys(inc.budgets).forEach(mo => { const o = cur.budgets[mo], x = inc.budgets[mo]; if (!o) added.budgets++; else if (same(o, x)) identical.budgets++; else conflicts.push({ kind: 'budgets', id: mo, cur: o, inc: x }); out.budgets[mo] = x; });
+  return { data: out, added, identical, conflicts };
+}
+const toCsv = rows => '\uFEFF' + rows.map(r => r.map(v => { v = v == null ? '' : String(v); return /[",\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }).join(',')).join('\r\n');
+const api = { mergeData, toCsv, same };
+if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.ExMerge = api;
+})(typeof self !== 'undefined' ? self : this);
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
+<script>'use strict';
+const E=ExEngine,$$=E.fmtINR,q=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ACCTS=['NSLC','NFDL','NHDF','NSCC','PSCC','N811','NFPL','P811','PPNB','PSLC','PUCC'],NOCARD=ACCTS.filter(a=>!E.CARDS.includes(a));
+const CAT_H=['Rent','Transport','Bills','Food','Groceries','Shopping'],CAT_P=['Personal \u2013 Neo','Personal \u2013 Presha'];
+const OBL=['REIMBURSEMENT','PERSONAL_SETTLEMENT','PERSONAL_CARD_RESTORATION','CROSS_SETTLEMENT'];
+const TYPES={REIMBURSEMENT:'Reimbursement',PERSONAL_SETTLEMENT:'Personal Settlement',PERSONAL_CARD_RESTORATION:'Personal Card Restoration',CROSS_SETTLEMENT:'Cross Settlement',CARD_BILL_PAYMENT:'Card Bill Payment',TRANSFER:'Transfer'};
+const BN={RENT:'Rent',TRANSPORT_BILLS:'Transport & Bills',FOOD_GROCERY_SHOPPING:'Food, Groceries & Shopping',PERSONAL:'Personal'};
+const VIEWS=[['dash','Dashboard'],['txf','+ Add'],['tx','Transactions'],['st','Settlements'],['ob','Obligations'],['bal','Balances'],['bud','Budget'],['rep','Reports'],['bk','Backup']];
+let data={transactions:[],settlements:[],budgets:{},settings:{cardPoolCap:null}},st={view:'dash',month:'',tx:null,se:null,f:{cat:'',payer:'',who:'',q:''},persisted:null};
+/* storage (IndexedDB) */
+const idb=()=>new Promise((ok,no)=>{const r=indexedDB.open('extracker',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)});
+async function load(){const d=await idb();return new Promise(ok=>{const g=d.transaction('kv').objectStore('kv').get('data');g.onsuccess=()=>ok(g.result);g.onerror=()=>ok(null)})}
+async function saveIDB(){const d=await idb();return new Promise((ok,no)=>{const t=d.transaction('kv','readwrite');t.objectStore('kv').put(JSON.parse(JSON.stringify(data)),'data');t.oncomplete=ok;t.onerror=()=>no(t.error)})}
+/* helpers */
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const plain=p=>Math.trunc(p/100)+'.'+String(p%100).padStart(2,'0');
+const pm=m=>{let y=+m.slice(0,4),n=+m.slice(5)-1;if(!n){y--;n=12}return y+'-'+String(n).padStart(2,'0')};
+const nextId=(p,a)=>p+String(a.reduce((m,x)=>Math.max(m,parseInt(x.id.slice(1))||0),0)+1).padStart(3,'0');
+const opts=(a,sel,blank)=>(blank!=null?`<option value="">${blank}</option>`:'')+a.map(x=>{const v=Array.isArray(x)?x[0]:x,l=Array.isArray(x)?x[1]:x;return `<option value="${esc(v)}"${v===sel?' selected':''}>${esc(l)}</option>`}).join('');
+const tbl=(h,r,x)=>{const num=c=>/^(<b>)?-?\u20B9/.test(String(c)),nc=h.map((x,i)=>r.some(w=>num(w[i]))),cv=h.length>=5?' cv':'',tc=h.length>=5&&h[0]==='ID'?' tc':'',tl=r.length>12?' tall':'';
+ return `<div class="sc${cv}${tc}${tl}${x||''}"><table${h.length>=9?' class="wd"':''}><thead><tr>${h.map((x,i)=>`<th${nc[i]?' class="n"':''}>${x}</th>`).join('')}</tr></thead><tbody>${r.map(w=>`<tr>${w.map((c,i)=>`<td${nc[i]?' class="n"':''} data-l="${h[i]}">${c}</td>`).join('')}</tr>`).join('')||`<tr><td class="em" colspan="${h.length}">Nothing here yet</td></tr>`}</tbody></table></div>`};
+const sb=(pc,c)=>`<div class="bar" style="min-width:110px"><i style="width:${pc.toFixed(1)}%;background:var(--${c})"></i></div>`;
+const badge=s=>`<span class="tag ${s}">${({OPEN:'OPEN',PARTIALLY_SETTLED:'PARTIALLY SETTLED',SETTLED:'SETTLED',OVER_SETTLED:'OVER SETTLED',OK:'OK',PASS:'PASS',FAIL:'FAIL',NEGATIVE:'NEGATIVE'})[s]||s}</span>`;
+const fld=(l,c)=>`<div><label>${l}</label>${c}</div>`;
+const fundsLbl=f=>({HOUSEHOLD_POOL:'Household',NEO_PERSONAL:'Neo'})[f]||f;
+const months=()=>{const s=new Set([E.monthOf(today())]);data.transactions.forEach(t=>s.add(E.monthOf(t.date)));data.settlements.forEach(t=>s.add(E.monthOf(t.date)));Object.keys(data.budgets).forEach(m=>s.add(m));return [...s].sort()};
+const inM=a=>a.filter(x=>E.monthOf(x.date)===st.month);
+/* icons (inline SVG) */
+const IC={dash:'<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',txf:'<path d="M12 5v14M5 12h14"/>',tx:'<path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/>',st:'<path d="M4 8h13l-3-3M20 16H7l3 3"/>',ob:'<circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/>',bal:'<path d="M3 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 7l2-3h11M17 14h.01"/>',bud:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/>',rep:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',bk:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>',home:'<path d="M3 11l9-8 9 8M5 10v10h14V10"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/>',card:'<rect x="2" y="5" width="20" height="14" rx="2.5"/><path d="M2 10h20"/>',pend:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/>',trash:'<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',save:'<path d="M5 3h11l3 3v15H5zM8 3v5h7V3M8 21v-7h8v7"/>',warn:'<path d="M12 3l10 18H2zM12 10v5M12 18h.01"/>',db:'<ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>',up:'<path d="M12 16V4M7 9l5-5 5 5M4 20h16"/>'};
+const ic=(k,z)=>`<svg class="ic" width="${z||20}" height="${z||20}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[k]||''}</svg>`;
+/* navigation */
+function go(v){st.view=v;if(v==='txf'&&!st.tx)st.tx=newTx();if(v==='se'&&!st.se)st.se=newSe();render();scrollTo(0,0)}
+function mLbl(m){const a=String(m||'').split('-'),n=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+a[1]-1];return n?n+' '+a[0]:''}
+function setMonth(m){if(m){st.month=m;render()}}
+function render(){q('#nav').innerHTML=VIEWS.map(([k,l])=>{const on=st.view===k||(k==='st'&&st.view==='sef')||(k==='txf'&&st.view==='txf');return `<button class="${on?'on':''}" ${on?'aria-current="page"':''} onclick="go('${k}')">${ic(k)}<span>${l.replace('+ ','')}</span></button>`}).join('');
+ const activeNav=q('#nav button.on');if(activeNav&&window.innerWidth<=1139)activeNav.scrollIntoView({inline:'center',block:'nearest'});
+ q('#mon').value=st.month;q('#monl').textContent=mLbl(st.month);q('#app').innerHTML=({dash:vDash,txf:vTxForm,tx:vTx,st:vSt,sef:vSeForm,ob:vOb,bal:vBal,bud:vBud,rep:vRep,bk:vBk})[st.view]();if(typeof hook==='function')hook()}
+/* dashboard */
+function vDash(){const S=E.summary(data,st.month),p=S.pool,obs=E.buildObligations(data).filter(o=>o.month===st.month);
+ if(!data.transactions.length)return `<div class="empty">${ic('rep',44)}<h2>No Data Yet</h2><p>Import your backup file, or add a transaction.</p><button class="p" onclick="go('bk')">Open Backup &amp; Settings</button></div>`;
+ const stat=(i,l,v,s)=>`<div class="st"><div class="si">${ic(i,18)}</div><div class="mut">${l}</div><b>${v}</b><div class="sub">${s||'&nbsp;'}</div></div>`,
+ dot=(c,t)=>`<span style="white-space:nowrap"><span class="dot" style="background:var(--${c})"></span>${t}</span>`;
+ const bk=S.buckets.map(b=>{const neg=b.status==='NEGATIVE',pc=b.available>0?Math.min(100,b.spent*100/b.available):(b.spent>0?100:0);
+  return `<div class="bk"><div class="bh"><b>${BN[b.bucket]}</b>${badge(b.status)}</div><div class="bar" role="img" aria-label="${esc(BN[b.bucket])}: ${$$(b.spent)} spent of ${$$(b.available)}"><i class="${neg?'bad':''}" style="width:${pc.toFixed(1)}%"></i></div><div class="bn"><span>${$$(b.spent)} <span class="mut">of ${$$(b.available)}</span></span><b class="${b.status}">${neg?$$(-b.remaining)+' Over':$$(b.remaining)+' Left'}</b></div></div>`}).join('');
+ const cats=Object.entries(S.byCategory).sort((a,b)=>b[1]-a[1]),tot=cats.reduce((n,c)=>n+c[1],0);let acc=0;
+ const seg=cats.map(([k,v],i)=>{const pc=v*100/tot,d=Math.max(0,pc-.7),r=`<circle r="15.9155" cx="21" cy="21" fill="none" stroke="var(--c${i%8+1})" stroke-width="5" stroke-dasharray="${d.toFixed(2)} ${(100-d).toFixed(2)}" stroke-dashoffset="${(25-acc).toFixed(2)}"/>`;acc+=pc;return r}).join('');
+ const donut=tot?`<div class="dn"><div class="dw"><svg viewBox="0 0 42 42" role="img" aria-label="Spending by category"><circle r="15.9155" cx="21" cy="21" fill="none" stroke="var(--bd)" stroke-width="5"/>${seg}</svg><div class="dc"><span class="mut">Total</span><b>${$$(tot)}</b></div></div><ul class="lg">${cats.map(([k,v],i)=>`<li><i style="background:var(--c${i%8+1})"></i><span>${esc(k)}</span><b>${$$(v)}</b><em>${Math.round(v*100/tot)}%</em></li>`).join('')}</ul></div>`:`<p class="mut">No spending this month.</p>`;
+ const gp=p?Math.min(100,Math.max(0,p.committedPct)):0,arc='M10 60A50 50 0 0 1 110 60';
+ const gauge=p?`<div class="gw"><svg viewBox="0 0 120 68" role="img" aria-label="NHDF pool ${p.committedPct}% Committed"><path d="${arc}" pathLength="100" fill="none" stroke="var(--bd)" stroke-width="10" stroke-linecap="round"/>${gp>0?`<path d="${arc}" pathLength="100" fill="none" stroke="${p.committedPct>100?'var(--bad)':p.committedPct>=90?'var(--warn)':'var(--ac)'}" stroke-width="10" stroke-linecap="round" stroke-dasharray="${gp} 100"/>`:''}</svg><div class="gc"><b>${p.committedPct}%</b><div class="mut">Committed</div></div></div><p style="text-align:center;margin:10px 0 0">Committed ${$$(p.committed)} of CAP ${$$(p.cap)}<br>${p.headroom<0?'<b class="err">OVER BY '+$$(-p.headroom)+'</b>':(p.committedPct>=100?'<b class="wrn">AT CAP · HEADROOM '+$$(p.headroom)+'</b>':p.committedPct>=90?'<b class="wrn">NEAR CAP · HEADROOM '+$$(p.headroom)+'</b>':'HEADROOM <b>'+$$(p.headroom)+'</b>')}<br><span class="mut">Paid ${$$(p.used)} · Card Bills Not Yet Paid ${$$(p.cardsDue)} · Restoration Due ${$$(p.restorationDue)}</span></p>`:`<p class="mut">Set a budget for this month to see the pool.</p>`;
+ const cards=E.CARDS.map(c=>{const x=S.cards[c],g=x.gross,w=v=>g>0?(v*100/g).toFixed(2):0;
+  return `<div class="cr"><div class="bh"><b>${ic('card',16)} ${c}</b><span>${$$(g)}</span></div><div class="stk" role="img" aria-label="${c}: Household ${$$(x.household)}, Neo ${$$(x.Neo)}, Presha ${$$(x.Presha)}">${[[x.household,'ac'],[x.Neo,'neo'],[x.Presha,'pre']].filter(z=>z[0]>0).map(z=>`<i style="width:${w(z[0])}%;background:var(--${z[1]})"></i>`).join('')}</div><div class="sub" style="margin-top:4px">${x.tracksBill?'Outstanding '+$$(x.outstanding):'Own Bill'}</div></div>`}).join('');
+ const sts=['OPEN','PARTIALLY_SETTLED','SETTLED','OVER_SETTLED'],chips=sts.map(k=>{const n=obs.filter(o=>o.status===k).length;return `<span class="tag ${k}${n?'':' z'}"><b>${n}</b>${({OPEN:'OPEN',PARTIALLY_SETTLED:'PARTIALLY SETTLED',SETTLED:'SETTLED',OVER_SETTLED:'OVER SETTLED'})[k]}</span>`}).join('');
+ const ow=o=>{const e=Object.entries(o).sort((a,b)=>b[1]-a[1]),mx=e.length?e[0][1]:0;return e.length?e.map(([k,v])=>`<div class="ow"><span>${esc(k)}</span><div class="bar"><i style="width:${mx>0?(v*100/mx).toFixed(1):0}%;background:var(--ac)"></i></div><b>${$$(v)}</b></div>`).join(''):'<p class="mut">Nothing Outstanding.</p>'};
+ return `<div class="grid">${stat('dash','Household Spend',$$(S.household))}${stat('user','Personal Spend',$$(S.personal),dot('neo','Neo '+$$(S.personalBy.Neo))+' &nbsp; '+dot('pre','Presha '+$$(S.personalBy.Presha)))}${stat('card','Credit Cards',$$(S.cardGross),'Outstanding '+$$(S.cardOutstanding))}${stat('pend','Open Obligations',S.openCount,$$(S.openAmount)+' Outstanding'+(S.overSettledCount?` \u00B7 <span class="err">${S.overSettledCount} over-settled</span>`:''))}</div>
+ <div class="g2"><div class="box"><h3>Buckets</h3>${bk}</div><div class="box"><h3>Spending by Category</h3>${donut}</div></div>
+ <div class="g2"><div class="box"><h3>NHDF Pool</h3>${gauge}</div><div class="box"><h3>Card Charges by Owner</h3>${cards}<div class="sub" style="margin-top:12px">${dot('ac','Household')} &nbsp; ${dot('neo','Neo')} &nbsp; ${dot('pre','Presha')}</div></div></div>
+ <div class="box" style="margin-top:12px"><h3>Obligations</h3><div class="chips">${chips}</div><div class="g2" style="margin-top:0"><div><div class="mut" style="margin-bottom:4px">Outstanding by Person</div>${ow(S.outstandingByDebtor)}</div><div><div class="mut" style="margin-bottom:4px">Outstanding by Creditor</div>${ow(S.outstandingByCreditor)}</div></div></div>
+ <h2>Tracked Balances</h2>${tbl(['Account','Balance','Net Position'],E.TRACKED.map(a=>[a,$$(S.balances[a].balance),$$(S.balances[a].netPosition)]))}`}
+/* transactions */
+const newTx=()=>({id:'',date:today(),expenseType:'HOUSEHOLD',category:'Food',description:'',amountStr:'',payerAccount:'NSLC',beneficiary:'',nhdfMoneySource:'HOUSEHOLD_POOL',notes:''});
+const toTx=d=>({id:d.id,date:d.date,expenseType:d.expenseType,category:d.category,description:d.description.trim(),amount:E.parseRupees(d.amountStr)||0,payerAccount:d.payerAccount,beneficiary:d.expenseType==='PERSONAL'?d.beneficiary:'',nhdfMoneySource:d.payerAccount==='NHDF'?d.nhdfMoneySource:'',notes:d.notes.trim()});
+function U(k,v,re){const d=st.tx;d[k]=v;
+ if(k==='expenseType'){d.category=v==='PERSONAL'?CAT_P[0]:'Food';d.beneficiary=v==='PERSONAL'?'Neo':''}
+ if(k==='category'&&d.expenseType==='PERSONAL')d.beneficiary=v.split('\u2013 ')[1];
+ if(k==='beneficiary'&&d.expenseType==='PERSONAL')d.category='Personal \u2013 '+v;
+ re?render():q('#pv').innerHTML=txPreview()}
+function txPreview(){const t=toTx(st.tx),v=E.validateTx(t),d=E.deriveTx(t),o=d.obligation,kv=(k,x)=>`<div class="kv"><span>${k}</span><b>${x}</b></div>`;
+ return `<div class="box pvw"><div class="pt"><span class="mut">Preview</span><b>${$$(t.amount)}</b></div>${kv('Bucket',esc(BN[d.bucket]||'\u2013'))}${kv('Funding',esc(d.funding||'\u2013'))}${kv('Treatment',esc(({NO_OBLIGATION:'No Obligation',CARD_CHARGE:'Card Charge',CARD_CHARGE_POOL_DUE:'Card Charge · Pool Due',HOUSEHOLD_REIMBURSEMENT:'Household Reimbursement',PERSONAL_SELF_PAID:'Personal Self-Paid',PERSONAL_CC_RESTORATION:'Personal Card Restoration',PERSONAL_REIMBURSEMENT:'Personal Reimbursement'})[d.treatment]||d.treatment))}${d.cardCharges.map(c=>kv('Card Charge',`${esc(c.card)} ${$$(c.amount)} <span class="mut">(${esc(c.kind)})</span>`)).join('')}${o?`<div class="ob2">${ic('pend',16)}<span><b>${esc(o.debtor)}</b> owes <b>${esc(o.creditor)}${fundsLbl(o.creditorFunds)?' ('+esc(fundsLbl(o.creditorFunds))+')':''}</b> ${$$(o.amount)}${o.sourceCard?' \u00B7 via '+esc(o.sourceCard):''}</span></div>`:''}${v.errors.map(e=>`<div class="msg err">\u2716 ${esc(e)}</div>`).join('')}${v.warnings.map(e=>`<div class="msg wrn">\u26A0 ${esc(e)}</div>`).join('')}</div>`}
+function vTxForm(){const d=st.tx,P=d.expenseType==='PERSONAL',oi=(k,ty,x)=>`<input ${ty||'type="text"'} value="${esc(d[k])}" oninput="U('${k}',this.value)" ${x||''}>`;
+ return `<h2>${d.id?'Edit '+d.id:'Add Transaction'}</h2><div class="box"><div class="form">
+ ${fld('Date',oi('date','type="date"'))}${fld('Type',`<select onchange="U('expenseType',this.value,1)">${opts([['HOUSEHOLD','Household'],['PERSONAL','Personal']],d.expenseType)}</select>`)}
+ ${fld('Category',`<select onchange="U('category',this.value,1)">${opts(P?CAT_P:CAT_H,d.category)}</select>`)}
+ ${fld('Amount',`<div class="amt"><span>\u20B9</span>${oi('amountStr','inputmode="decimal" placeholder="0.00"')}</div>`)}
+ ${fld('Payer Account',`<select onchange="U('payerAccount',this.value,1)">${opts(ACCTS,d.payerAccount)}</select>`)}
+ ${P?fld('Beneficiary',`<select onchange="U('beneficiary',this.value,1)">${opts(['Neo','Presha'],d.beneficiary)}</select>`):''}
+ ${d.payerAccount==='NHDF'?fld('NHDF money source',`<select onchange="U('nhdfMoneySource',this.value,1)">${opts([['HOUSEHOLD_POOL','Household Pool'],['NEO_PERSONAL','Neo Personal']],d.nhdfMoneySource)}</select>`):''}
+ ${fld('Description',oi('description'))}${fld('Notes',oi('notes'))}</div></div><div id="pv" style="margin:12px 0">${txPreview()}</div>
+ <div class="row abar"><button class="p" onclick="saveTx()">${ic('save',18)} Save Transaction</button><button onclick="st.tx=null;go('tx')">Cancel</button></div>`}
+async function saveTx(){const t=toTx(st.tx),v=E.validateTx(t);if(v.errors.length)return alert(v.errors.join('\n'));
+ if(v.warnings.length&&!confirm(v.warnings.join('\n')+'\nSave anyway?'))return;
+ if(!t.id)t.id=nextId('T',data.transactions);const i=data.transactions.findIndex(x=>x.id===t.id);i>=0?data.transactions[i]=t:data.transactions.push(t);
+ await save();st.month=E.monthOf(t.date);st.tx=null;go('tx')}
+function editTx(id){const t=data.transactions.find(x=>x.id===id);st.tx={...t,amountStr:plain(t.amount),nhdfMoneySource:t.nhdfMoneySource||'HOUSEHOLD_POOL'};go('txf')}
+async function delTx(id){if(!confirm('Delete '+id+'? This cannot be undone.'))return;data.transactions=data.transactions.filter(x=>x.id!==id);await save();render()}
+function listTx(){const f=st.f,s=f.q.toLowerCase();
+ const r=inM(data.transactions).filter(t=>(!f.cat||t.category===f.cat)&&(!f.payer||t.payerAccount===f.payer)&&(!f.who||t.beneficiary===f.who)&&(!s||(t.description+' '+t.notes+' '+t.id).toLowerCase().includes(s))).sort((a,b)=>a.date<b.date?1:a.date>b.date?-1:a.id<b.id?1:-1);
+ return `<p class="mut">${r.length} Transactions \u00B7 ${$$(r.reduce((x,t)=>x+t.amount,0))}</p>`+tbl(['ID','Date','Description','Category','Payer','Amount',''],r.map(t=>[t.id,E.fmtDate(t.date),esc(t.description)+(t.notes?` <span class="mut">${esc(t.notes)}</span>`:''),esc(t.category),t.payerAccount+(t.nhdfMoneySource==='NEO_PERSONAL'?' (Neo)':''),$$(t.amount),`<div class="acts"><button class="ib" title="Edit" aria-label="Edit ${t.id}" onclick="editTx('${t.id}')">${ic('edit',18)}</button><button class="ib d" title="Delete" aria-label="Delete ${t.id}" onclick="delTx('${t.id}')">${ic('trash',18)}</button></div>`]))}
+function F(k,v){st.f[k]=v;q('#txl').innerHTML=listTx()}
+function vTx(){const f=st.f;return `<h2>Transactions</h2><div class="row"><input placeholder="Search" value="${esc(f.q)}" oninput="F('q',this.value)"><select onchange="F('cat',this.value)">${opts(Object.keys(E.CATEGORIES),f.cat,'All Categories')}</select><select onchange="F('payer',this.value)">${opts(ACCTS,f.payer,'All Payers')}</select><select onchange="F('who',this.value)">${opts(['Neo','Presha'],f.who,'All Persons')}</select><button class="p" onclick="st.tx=newTx();go('txf')">+ Add</button></div><div id="txl">${listTx()}</div>`}
+/* settlements */
+const newSe=()=>({id:'',date:today(),type:'REIMBURSEMENT',bucket:'FOOD_GROCERY_SHOPPING',debtor:'NSLC',originalCreditor:'P811',creditorFunds:'HOUSEHOLD_POOL',receiverAccount:'',paidByAccount:'',sourceCard:'',pairId:'',amountStr:'',notes:''});
+const toSe=d=>{const T=d.type,o={id:d.id,date:d.date,type:T,bucket:d.bucket,debtor:d.debtor,originalCreditor:d.originalCreditor,creditorFunds:'',receiverAccount:d.receiverAccount,paidByAccount:d.paidByAccount,sourceCard:d.sourceCard,pairId:T==='CROSS_SETTLEMENT'?d.pairId.trim():'',amount:E.parseRupees(d.amountStr)||0,notes:d.notes.trim()};
+ if(T==='PERSONAL_SETTLEMENT'||T==='PERSONAL_CARD_RESTORATION')o.bucket='PERSONAL';
+ if(T==='CARD_BILL_PAYMENT'){o.debtor=d.paidByAccount;o.bucket='FOOD_GROCERY_SHOPPING';o.receiverAccount=''}
+ if(T==='TRANSFER'){o.debtor=d.paidByAccount;o.originalCreditor=d.receiverAccount;o.bucket='FOOD_GROCERY_SHOPPING'}
+ if(T!=='PERSONAL_CARD_RESTORATION'&&T!=='CROSS_SETTLEMENT'&&T!=='REIMBURSEMENT'&&T!=='PERSONAL_SETTLEMENT')o.sourceCard='';
+ if(o.originalCreditor==='NHDF'&&OBL.includes(T))o.creditorFunds=d.creditorFunds||'HOUSEHOLD_POOL';return o};
+function SU(k,v,re){const d=st.se;d[k]=v;
+ if(k==='type'){const p=v==='PERSONAL_SETTLEMENT'||v==='PERSONAL_CARD_RESTORATION';d.bucket=p?'PERSONAL':d.bucket==='PERSONAL'?'FOOD_GROCERY_SHOPPING':d.bucket;
+  d.debtor=p?'Neo':'NSLC';d.paidByAccount=v==='CARD_BILL_PAYMENT'?'NHDF':'';d.originalCreditor=v==='CARD_BILL_PAYMENT'?'NSCC':v==='PERSONAL_CARD_RESTORATION'?'NHDF':'P811';d.receiverAccount=v==='PERSONAL_CARD_RESTORATION'?'NSLC':'';d.sourceCard=''}
+ if(k==='bucket'&&re)d.debtor=v==='PERSONAL'?'Neo':'NSLC';re?render():q('#spv').innerHTML=sePreview()}
+function sePreview(){const s=toSe(st.se),v=E.validateSettlement(s);let h=v.errors.map(e=>`<span class="err">\u2716 ${esc(e)}</span>`).join('<br>');
+ if(s.pairId){const p=E.checkPairs(data.settlements.filter(x=>x.id!==s.id).concat(s)).find(x=>x.pairId===s.pairId);if(p)h+=`<br>Pair ${esc(p.pairId)}: ${p.count} rows \u00B7 ${p.balanced?'<span class="OK">Balanced</span>':'<span class="err">Unbalanced</span> '+Object.entries(p.net).filter(x=>x[1]).map(([k,n])=>k+' '+$$(n)).join(', ')+' (+ = owes more than owed)'}`}
+ return `<div class="box pvw">${h||`<span class="OK">${ic('ob',18)} Looks valid</span>`}</div>`}
+function vSeForm(){const d=st.se,T=d.type,O=OBL.includes(T),P=d.bucket==='PERSONAL',oi=(k,ty,x)=>`<input ${ty||'type="text"'} value="${esc(d[k])}" oninput="SU('${k}',this.value)" ${x||''}>`,sel=(k,a,b)=>`<select onchange="SU('${k}',this.value,1)">${opts(a,d[k],b)}</select>`;
+ const bk=T==='REIMBURSEMENT'?BN&&['RENT','TRANSPORT_BILLS','FOOD_GROCERY_SHOPPING']:T==='CROSS_SETTLEMENT'?Object.keys(BN):null;
+ return `<h2>${d.id?'Edit '+d.id:'Add settlement'}</h2><div class="box"><div class="form">${fld('Date',oi('date','type="date"'))}${fld('Type',sel('type',Object.entries(TYPES)))}${fld('Amount',`<div class="amt"><span>\u20B9</span>${oi('amountStr','inputmode="decimal" placeholder="0.00"')}</div>`)}
+ ${O&&bk?fld('Bucket',sel('bucket',bk.map(b=>[b,BN[b]]))):''}
+ ${O?fld(P?'Debtor person':'Debtor account',sel('debtor',P?['Neo','Presha']:['NSLC','NFDL','NHDF'])):''}
+ ${O?fld('Original creditor',sel('originalCreditor',ACCTS)):''}
+ ${O&&d.originalCreditor==='NHDF'?fld('Creditor funds',sel('creditorFunds',[['HOUSEHOLD_POOL','Household Pool'],['NEO_PERSONAL','Neo Personal']])):''}
+ ${T==='CARD_BILL_PAYMENT'?fld('Card',sel('originalCreditor',E.CARDS)):''}
+ ${T==='PERSONAL_CARD_RESTORATION'?fld('Source card',sel('sourceCard',E.CARDS,'\u2013')):''}
+ ${T==='CROSS_SETTLEMENT'?fld('Pair ID',`<input value="${esc(d.pairId)}" list="pl" oninput="SU('pairId',this.value)"><datalist id="pl">${[...new Set(data.settlements.map(s=>s.pairId).filter(Boolean))].map(p=>`<option value="${esc(p)}">`).join('')}</datalist>`):''}
+ ${T!=='CROSS_SETTLEMENT'?fld('Paid by account',sel('paidByAccount',NOCARD,'\u2013 none \u2013')):''}
+ ${T!=='CROSS_SETTLEMENT'&&T!=='CARD_BILL_PAYMENT'?fld('Received by account',sel('receiverAccount',NOCARD,'\u2013 none \u2013')):''}
+ ${fld('Notes',oi('notes'))}</div></div><div id="spv" style="margin:12px 0">${sePreview()}</div><div class="row abar"><button class="p" onclick="saveSe()">${ic('save',18)} Save settlement</button><button onclick="st.se=null;go('st')">Cancel</button></div>`}
+async function saveSe(){const s=toSe(st.se),v=E.validateSettlement(s);if(v.errors.length)return alert(v.errors.join('\n'));
+ if(!s.id)s.id=nextId('S',data.settlements);const i=data.settlements.findIndex(x=>x.id===s.id);i>=0?data.settlements[i]=s:data.settlements.push(s);
+ await save();st.month=E.monthOf(s.date);st.se=null;go('st')}
+function editSe(id){const s=data.settlements.find(x=>x.id===id);st.se={...s,amountStr:plain(s.amount),creditorFunds:s.creditorFunds||'HOUSEHOLD_POOL'};st.view='sef';render()}
+async function delSe(id){if(!confirm('Delete '+id+'?'))return;data.settlements=data.settlements.filter(x=>x.id!==id);await save();render()}
+function vSt(){const r=inM(data.settlements).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:a.id<b.id?-1:1),pr=E.checkPairs(data.settlements).filter(p=>r.some(s=>s.pairId===p.pairId));
+ return `<h2>Settlements</h2><div class="row"><button class="p" onclick="st.se=newSe();st.view='sef';render()">+ Add Settlement</button></div>
+ ${pr.length?`<div class="box">${pr.map(p=>`Pair ${esc(p.pairId)}: ${$$(p.total)} across ${p.count} rows \u2013 ${p.balanced?'<span class="OK">BALANCED</span>':'<span class="err">UNBALANCED</span>'}`).join('<br>')}</div>`:''}<br>`+
+ tbl(['ID','Date','Type','From \u2192 To','Bucket','Amount','Paid By','Received','Pair',''],r.map(s=>[s.id,E.fmtDate(s.date),TYPES[s.type]||s.type,esc(s.debtor)+' \u2192 '+esc(s.originalCreditor)+(s.creditorFunds?' ('+esc(fundsLbl(s.creditorFunds))+')':''),BN[s.bucket]||'',$$(s.amount),s.paidByAccount,s.receiverAccount,esc(s.pairId),`<div class="acts"><button class="ib" title="Edit" aria-label="Edit ${s.id}" onclick="editSe('${s.id}')">${ic('edit',18)}</button><button class="ib d" title="Delete" aria-label="Delete ${s.id}" onclick="delSe('${s.id}')">${ic('trash',18)}</button></div>`]))}
+/* obligations, balances, budget */
+function vOb(){const r=E.buildObligations(data).filter(o=>o.month===st.month);
+ return `<h2>Obligations</h2><p class="mut">Derived from Transactions and Settlements.</p>`+tbl(['Kind','Bucket','Debtor','Creditor','Obligation','Settled','Outstanding','Status'],r.map(o=>[o.scope==='PERSONAL'?'Personal':'Household',BN[o.bucket],esc(o.debtor),esc(o.creditor)+(o.creditorFunds?' ('+esc(fundsLbl(o.creditorFunds))+')':'')+(o.sourceCards.length?' \u00B7 via '+o.sourceCards.join('/'):''),$$(o.obligation),$$(o.settled),$$(o.outstanding)+(o.overSettled?` <span class="err">(+${$$(o.overSettled)} Over)</span>`:''),badge(o.status)]))}
+async function setPoolTo(v){data.settings=data.settings||{};data.settings.poolReceivablesTo=v;await save();render()}
+function vBal(){const B=E.balances(data,st.month),p=E.poolTracker(data,st.month),C=E.cardSummary(data,st.month);
+ return `<h2>Tracked Balances</h2><div class="box" style="margin-bottom:10px"><label>Money owed to the NHDF Pool is Counted at</label><select onchange="setPoolTo(this.value)">${opts([['NSLC','NSLC (Default)'],['NHDF','NHDF']],(data.settings&&data.settings.poolReceivablesTo)||'NSLC')}</select></div>`+tbl(['Account','Opening','Spent Directly','Settlements Paid','Card Bills','Received','Balance','Receivables','Payables','Card Payable','Net Position'],E.TRACKED.map(a=>{const b=B[a];return [a,$$(b.opening),$$(b.direct),$$(b.settlementsPaid),$$(b.cardBillsPaid),$$(b.received),`<b>${$$(b.balance)}</b>`,$$(b.receivables),$$(b.payables),$$(b.cardPayable),`<b>${$$(b.netPosition)}</b>`]}))+
+ (p?`<h2>NHDF Pool Tracker</h2>`+tbl(['Item','Amount'],[['NHDF FGS Pool Opening',$$(p.opening)],['NHDF - Paid Household',$$(-p.hhSpend)],['NHDF - Paid Personal',$$(-p.perSpend)],['Card Bills',$$(-p.cardBills)],['Transfers / Settlements Out',$$(-p.transfersOut)],['Money Received',$$(p.received)],['<b>Remaining Pool</b>',`<b>${$$(p.remaining)}</b>`],['Card Bills Not Yet Paid',$$(-p.cardsDue)],['<b>Headroom Under Cap</b>',`<b>${$$(p.headroom)}</b>`],['Personal Restoration Due',$$(p.restorationDue)],['Household Amounts Due',$$(p.householdDue)]],' wr')+`<div class="box" style="margin-top:8px"><div class="bar"><i class="${p.committedPct>100?'bad':p.committedPct>=90?'warn':''}" style="width:${Math.min(100,p.committedPct)}%"></i></div>Committed ${p.committedPct}% of ${$$(p.cap)}</div>`:'<p class="mut">Set a Budget for this month to see the Pool.</p>')+
+ `<h2>Card Bills</h2>`+cardTbl(C)}
+const cardTbl=C=>tbl(['Card','Household','Neo','Presha','Gross','Bills Paid','Outstanding'],E.CARDS.map(c=>[c,$$(C[c].household),$$(C[c].Neo),$$(C[c].Presha),$$(C[c].gross),C[c].tracksBill?$$(C[c].billsPaid):'\u2013',C[c].tracksBill?$$(C[c].outstanding):'Own Bill']));
+function vBud(){const m=st.month,b=data.budgets[m]||{alloc:{},carryIn:{},opening:{}},bl=E.bucketLedger({...data,budgets:{...data.budgets,[m]:{...b,alloc:b.alloc,carryIn:{}}}},m),cur=x=>x==null?'':plain(x);
+ const ins=(pre,k,v,ph)=>`<div class="amt"><span>\u20B9</span><input id="${pre}-${k}" inputmode="decimal" value="${cur(v)}" placeholder="${ph||'0.00'}"></div>`;
+ return `<h2>Budget for ${esc(m)}</h2><p class="mut">Carry-in Left Blank = Previous Month's Remaining.</p><div class="g2" style="margin-top:0">`+E.BUCKETS.map((k,i)=>`<div class="box"><h3>${BN[k]}</h3><div class="form">${fld('Allocation',ins('a',k,b.alloc[k]))}${fld('Carry-in',ins('c',k,b.carryIn&&b.carryIn[k],'Auto '+plain(bl[i].carry)))}</div></div>`).join('')+`<div class="box" style="grid-column:1/-1"><h3>Opening Balances</h3><div class="form">`+E.TRACKED.map(a=>fld(a,ins('o',a,b.opening[a]))).join('')+`</div></div></div><div class="row abar"><button class="p" onclick="saveBud()">${ic('save',18)} Save Budget</button><button onclick="fillOpen()">Fill Openings from ${pm(m)} end Balances</button></div>`}
+function fillOpen(){const B=E.balances(data,pm(st.month));E.TRACKED.forEach(a=>q('#o-'+a).value=plain(B[a].balance))}
+async function saveBud(){const g=(p,k,blank)=>{const v=q('#'+p+'-'+k).value.trim();if(!v)return blank;const n=E.parseRupees(v);if(n==null){alert('Invalid amount for '+k);throw 0}return n};
+ try{const b={alloc:{},carryIn:{},opening:{}};E.BUCKETS.forEach(k=>{b.alloc[k]=g('a',k,0);b.carryIn[k]=g('c',k,null)});E.TRACKED.forEach(a=>b.opening[a]=g('o',a,0));data.budgets[st.month]=b;await save();go('dash')}catch(e){if(e!==0)throw e}}
+/* reports */
+function vRep(){const S=E.summary(data,st.month),tx=inM(data.transactions),pay={};tx.forEach(t=>{const k=t.payerAccount;pay[k]=pay[k]||{n:0,h:0,p:0};pay[k].n++;pay[k][t.expenseType==='HOUSEHOLD'?'h':'p']+=t.amount});
+ return `<h2>Category Spending</h2>`+(()=>{const e=Object.entries(S.byCategory).sort((a,b)=>b[1]-a[1]),mx=e.length?e[0][1]:1;return tbl(['Category','Share','Amount'],e.map(([k,v])=>[esc(k),`<div class="bar" style="min-width:120px"><i style="width:${(v*100/mx).toFixed(1)}%;background:var(--ac)"></i></div>`,$$(v)]),' cv k2')})()+
+ `<h2>Payer Summary</h2>`+(()=>{const e=Object.entries(pay).sort(),mx=Math.max(1,...e.map(([k,v])=>v.h+v.p));return tbl(['Payer','Transactions','Household','Personal','Total','Share'],e.map(([k,v])=>[k,v.n,$$(v.h),$$(v.p),$$(v.h+v.p),sb((v.h+v.p)*100/mx,'ac')]))})()+
+ `<h2>Per-card Summary</h2>`+cardTbl(S.cards)+
+ `<h2>Receivables by Creditor</h2>`+tbl(['Creditor','Total Obligation','Settled','Outstanding'],Object.entries(E.buildObligations(data).filter(o=>o.month===st.month).reduce((m,o)=>{const x=m[o.creditor]=m[o.creditor]||[0,0,0];x[0]+=o.obligation;x[1]+=o.settled;x[2]+=o.outstanding;return m},{})).map(([k,v])=>[k,...v.map($$)]),' cv k1')+
+ `<h2>Bucket Performance</h2>`+tbl(['Bucket','Allocation','Carry-in','Spent','Remaining','Used','Status'],S.buckets.map(b=>[BN[b.bucket],$$(b.alloc),$$(b.carry),$$(b.spent),$$(b.remaining),sb(b.available>0?Math.min(100,b.spent*100/b.available):(b.spent>0?100:0),b.status==='NEGATIVE'?'bad':'ok'),badge(b.status)]))}
+/* backup & self-check (export/import, xlsx, auto-save arrive in stage 3) */
+function vBk0(){const R=ExSelfCheck.run(E,data),ran=R.filter(r=>r.ok!==null),ok=ran.filter(r=>r.ok).length,good=ok===ran.length;
+ return `<h2>Where Your Data Lives</h2><div class="box"><span class="mut">Data lives in this Browser for this Address Only. The file:// copy and a hosted copy keep separate data \u2013 Pick One and Stay with it.</span></div>
+ <h2>Self-Check</h2><div class="box hero ${good?'okb':'badb'}"><div class="hi">${ic(good?'ob':'warn',28)}</div><div><b style="font-size:18px">${good?'All Checks Pass':'Some Checks need Attention'} <span class="tag ${good?'PASS':'FAIL'}">${ok}/${ran.length} PASS</span></b><div class="mut">Checks run on your Current Data. The September 2026 Acceptance Tests run only While the Imported September Data is Present.</div></div></div><details style="margin-top:8px"${good?'':' open'}><summary>Show All Checks</summary>`+tbl(['Test','Result','Detail'],R.map(r=>[esc(r.name),`<span class="${r.ok===null?'mut':r.ok?'PASS':'FAIL'}">${r.ok===null?'SKIPPED':r.ok?'PASS':'FAIL'}</span>`,esc(r.detail)]))+`</details>`}
+(async function init(){try{const d=await load();if(d)data=d}catch(e){alert('Could not open Local Storage: '+e)}
+ try{if(navigator.storage&&navigator.storage.persist){st.persisted=await navigator.storage.persisted();if(!st.persisted)st.persisted=await navigator.storage.persist()}}catch(e){}
+ st.month=E.monthOf(today());
+ q('#mon').onchange=e=>setMonth(e.target.value);q('#mon').onclick=e=>{try{e.target.showPicker()}catch(_){}};render()})();
+</script>
+<script>'use strict';
+/* Stage 3: backup, export/import, auto-save file, reminders. Overrides save() and vBk() from app.js. */
+let meta={},metaReady=false,fh=null,autoMsg='',autoNeed=false,pending=Promise.resolve();
+async function checkAuto(){if(!fh){autoNeed=false;return}try{autoNeed=(await fh.queryPermission({mode:'readwrite'}))!=='granted'}catch(e){autoNeed=true}}
+const kvGet=async k=>{const d=await idb();return new Promise(ok=>{const g=d.transaction('kv').objectStore('kv').get(k);g.onsuccess=()=>ok(g.result);g.onerror=()=>ok(undefined)})};
+const kvPut=async(k,v)=>{const d=await idb();return new Promise((ok,no)=>{const t=d.transaction('kv','readwrite');t.objectStore('kv').put(v,k);t.oncomplete=ok;t.onerror=()=>no(t.error)})};
+const dl=(name,text,type)=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2000)};
+const localDate=d=>{d=new Date(d);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const daysSince=i=>i?(Date.now()-new Date(i))/864e5:Infinity;
+const lastBk=()=>[meta.lastExport,meta.lastAuto].filter(Boolean).sort().pop();
+const hasData=()=>data.transactions.length||data.settlements.length;
+async function save(){await saveIDB();autoSave()}
+function autoSave(){if(!fh)return;pending=pending.then(async()=>{try{
+  if((await fh.queryPermission({mode:'readwrite'}))!=='granted'){autoMsg='Permission Needed: Tap "Re-Enable"';autoNeed=true;hook();if(st.view==='bk')render();return}
+  const w=await fh.createWritable();await w.write(E.exportJSON(data));await w.close();meta.lastAuto=new Date().toISOString();autoMsg='Saved '+new Date().toLocaleTimeString();autoNeed=false;await kvPut('meta',meta)}catch(e){autoMsg='Error: '+e.message}
+  hook();if(st.view==='bk')render()})}
+function hook(){if(!metaReady)return;const l=lastBk(),d=daysSince(l);
+ q('#lb').textContent='Last Backup: '+(l?E.fmtDate(localDate(l)):'Never');
+ let b='';if(fh&&autoNeed)b+='<div class="ban">\u26A0 Auto-Save is Paused: The browser needs your permission again, so Changes are NOT being written to your file. <button class="p" onclick="reAuto()">Re-enable Auto-Save</button></div>';
+ if(hasData()&&d>7)b+=`<div class="ban">\u26A0 ${l?'Last backup was '+Math.floor(d)+' days ago.':'You have never exported a Backup.'} <button class="p" onclick="doExport()">Export Now</button></div>`;
+ q('#ban').innerHTML=b}
+async function doExport(){dl('ExTracker-backup-'+localDate(new Date())+'.json',E.exportJSON(data),'application/json');meta.lastExport=new Date().toISOString();await kvPut('meta',meta);hook();if(st.view==='bk')render()}
+function exportCsv(k){const H={transactions:['ID','Date','Type','Category','Description','Amount','Payer','Beneficiary','NHDF Source','Notes'],settlements:['ID','Date','Type','Bucket','Debtor','Creditor','Creditor Funds','Receiver','Paid By','Source Card','Pair','Amount','Notes']};
+ const r=k==='transactions'?data.transactions.map(t=>[t.id,t.date,t.expenseType,t.category,t.description,plain(t.amount),t.payerAccount,t.beneficiary,t.nhdfMoneySource,t.notes]):data.settlements.map(s=>[s.id,s.date,s.type,s.bucket,s.debtor,s.originalCreditor,s.creditorFunds,s.receiverAccount,s.paidByAccount,s.sourceCard,s.pairId,plain(s.amount),s.notes]);
+ dl('ExTracker-'+k+'-'+localDate(new Date())+'.csv',ExMerge.toCsv([H[k],...r]),'text/csv')}
+function exportXlsx(){if(typeof XLSX==='undefined')return alert('Excel export needs the SheetJS library from cdnjs. Connect once and reload, or use CSV.');
+ const R=p=>p/100,wb=XLSX.utils.book_new(),add=(n,a)=>XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(a),n);
+ add('Transactions',data.transactions.map(t=>({ID:t.id,Date:t.date,Type:t.expenseType,Category:t.category,Description:t.description,'Amount (INR)':R(t.amount),Payer:t.payerAccount,Beneficiary:t.beneficiary,'NHDF Source':t.nhdfMoneySource,Notes:t.notes})));
+ add('Settlements',data.settlements.map(s=>({ID:s.id,Date:s.date,Type:s.type,Bucket:s.bucket,Debtor:s.debtor,Creditor:s.originalCreditor,'Creditor Funds':s.creditorFunds,Receiver:s.receiverAccount,'Paid By':s.paidByAccount,'Source Card':s.sourceCard,Pair:s.pairId,'Amount (INR)':R(s.amount),Notes:s.notes})));
+ add('Obligations',E.buildObligations(data).map(o=>({Month:o.month,Kind:o.scope,Bucket:o.bucket,Debtor:o.debtor,Creditor:o.creditor,Funds:o.creditorFunds,'Obligation (INR)':R(o.obligation),'Settled (INR)':R(o.settled),'Outstanding (INR)':R(o.outstanding),Status:o.status})));
+ add('Budget',Object.entries(data.budgets).map(([m,b])=>({Month:m,...Object.fromEntries(E.BUCKETS.map(k=>[BN[k]+' allocation',R(b.alloc[k]||0)])),...Object.fromEntries(E.BUCKETS.map(k=>[BN[k]+' carry-in',b.carryIn&&b.carryIn[k]!=null?R(b.carryIn[k]):'auto'])),...Object.fromEntries(E.TRACKED.map(a=>['Opening '+a,R(b.opening[a]||0)]))})));
+ XLSX.writeFile(wb,'ExTracker-'+localDate(new Date())+'.xlsx')}
+/* import */
+const sectionLbl=k=>({transactions:'Transactions',settlements:'Settlements',budgets:'Budgets'})[k]||k;
+async function pickImport(inp){const f=inp.files[0];if(!f)return;const r=E.parseImport(await f.text());inp.value='';
+ if(r.error){st.imp={error:r.error,name:f.name};return render()}
+ const inc=r.data,m=ExMerge.mergeData(data,inc),ids=(a)=>new Set(a.map(x=>x.id));
+ const bad=inc.transactions.filter(t=>E.validateTx(t).errors.length).length+inc.settlements.filter(s=>E.validateSettlement(s).errors.length).length;
+ const dup=['transactions','settlements'].some(k=>ids(inc[k]).size!==inc[k].length);
+ const removed=['transactions','settlements'].reduce((n,k)=>{const i=ids(inc[k]);return n+data[k].filter(x=>!i.has(x.id)).length},0);
+ st.imp={name:f.name,inc,m,bad,dup,removed,counts:r.counts};render()}
+const brief=(k,x)=>k==='transactions'?`${x.date} ${x.category} ${x.description} ${$$(x.amount)} (${x.payerAccount})`:k==='settlements'?`${x.date} ${x.type} ${x.debtor}\u2192${x.originalCreditor} ${$$(x.amount)}`:'Budget '+JSON.stringify(x.alloc);
+function impPreview(){const i=st.imp;if(!i)return '';if(i.error)return `<div class="box"><span class="err">\u2716 ${esc(i.name)}: ${esc(i.error)}</span></div>`;
+ const c=i.counts,m=i.m,cur={transactions:data.transactions.length,settlements:data.settlements.length,budgets:Object.keys(data.budgets).length};
+ return `<div class="box"><b>${esc(i.name)}</b> is a valid ExTracker export.${i.dup?'<br><span class="err">\u2716 It contains Duplicate IDs.</span>':''}${i.bad?`<br><span class="wrn">\u26A0 ${i.bad} record(s) fail validation (They will still Import).</span>`:''}</div><br>`+
+ tbl(['','In File','Currently Here','Merge: New','Merge: Identical'],['transactions','settlements','budgets'].map(k=>[sectionLbl(k),c[k],cur[k],m.added[k],m.identical[k]]))+
+ `<div class="box" style="margin-top:8px"><b>Merge</b>: Imported Record wins on the same ID. ${m.conflicts.length?`<span class="wrn">${m.conflicts.length} conflict(s) will be Overwritten:</span>`:'No conflicts.'}${m.conflicts.length?tbl(['ID','Here Now','Will Become'],m.conflicts.slice(0,25).map(x=>[x.id,esc(brief(x.kind,x.cur)),esc(brief(x.kind,x.inc))]))+(m.conflicts.length>25?`<p class="mut">\u2026and ${m.conflicts.length-25} more</p>`:''):''}<br><b>Replace</b>: Current Data is Deleted first${i.removed?` (<span class="wrn">${i.removed} record(s) here are not in the file</span>)`:''}.<p class="mut">A snapshot of your Current Data downloads automatically before either Action.</p>
+ <div class="row"><button class="p" onclick="applyImp('merge')">Merge</button><button class="d" onclick="applyImp('replace')">Replace</button><button onclick="st.imp=null;render()">Cancel</button></div></div>`}
+async function applyImp(mode){const i=st.imp;if(i.dup&&!confirm('The File has Duplicate IDs; The Later Record Wins. Continue?'))return;
+ if(mode==='replace'&&!confirm('Replace ALL Current Data with the File?'))return;
+ if(hasData())dl('ExTracker-before-import-'+localDate(new Date())+'-'+new Date().toTimeString().slice(0,5).replace(':','')+'.json',E.exportJSON(data),'application/json');
+ data=mode==='merge'?i.m.data:JSON.parse(JSON.stringify(i.inc));if(!data.settings)data.settings={cardPoolCap:null};await save();st.imp=null;
+ const ms=data.transactions.map(t=>E.monthOf(t.date)).sort();if(ms.length)st.month=ms[ms.length-1];go('dash')}
+/* auto-save file */
+async function chooseAuto(){try{fh=await showSaveFilePicker({suggestedName:'ExTracker-autosave.json',types:[{description:'JSON',accept:{'application/json':['.json']}}]});await kvPut('fh',fh);autoMsg='Enabled';autoNeed=false;autoSave();render()}catch(e){if(e.name!=='AbortError')alert(e.message)}}
+async function reAuto(){try{const r=await fh.requestPermission({mode:'readwrite'});autoNeed=r!=='granted';hook();render();autoSave()}catch(e){alert(e.message)}}
+async function stopAuto(){fh=null;autoMsg='';autoNeed=false;hook();await kvPut('fh',null);render()}
+async function askPersist(){try{st.persisted=await navigator.storage.persist()}catch(e){}render()}
+function vBk(){const l=lastBk(),d=daysSince(l),fs='showSaveFilePicker' in window,fresh=!!l&&d<=7&&!(fh&&autoNeed),dd=Math.floor(d),
+ tile=(i,t,v,x)=>`<div class="st"><div class="si">${ic(i,18)}</div><div class="mut">${t}</div><b style="font-size:20px">${v}</b><div class="sub">${x}</div></div>`;
+ return `<h2>Backup</h2><div class="box hero ${fresh?'okb':'wnb'}"><div class="hi">${ic(fresh?'bk':'warn',28)}</div><div><b style="font-size:18px">${fresh?'Your Data is Backed Up':(fh&&autoNeed)?'Auto-Save is Paused':l?'Your Backup is out of Date':'No Backup Yet'}</b><div class="mut">${(l?'Last Backup <b>'+E.fmtDate(localDate(l))+'</b> ('+(dd<1?'Today':dd+(dd===1?' day ago':' days ago'))+')':'You have never Exported a Backup')}. Keep a recent JSON export Somewhere outside this Browser (Browsers can clear Site Data).</div>${fh&&autoNeed?'<div style="margin-top:8px"><button class="p" onclick="reAuto()">Re-enable Auto-Save</button></div>':''}</div></div>
+ <div class="grid" style="margin-top:12px">${tile('Save','Auto-Save',fh?(autoNeed?'Paused':'On'):fs?'Off':'Unavailable',fh?esc(autoNeed?'Tap Re-enable':autoMsg||'Ready'):fs?'Choose a File Below':'Chromium Desktop only')}${tile('db','Persistent Storage',st.persisted==null?'Unknown':st.persisted?'Granted':'Not Granted',st.persisted?'Browser will keep Your data':'Browser may Clear data When Space is Low')}</div>
+ <h2>Export</h2><div class="box"><div class="row"><button class="p" onclick="doExport()">${ic('up',18)} Export all Data (JSON)</button><button onclick="exportXlsx()">Excel (.xlsx)</button><button onclick="exportCsv('transactions')">CSV: Transactions</button><button onclick="exportCsv('settlements')">CSV: Settlements</button></div></div>
+ <h2>Import from JSON</h2><div class="box"><label class="filepick"><span>Choose JSON File</span><input type="file" accept=".json,application/json" onchange="pickImport(this)"></label></div><div style="margin-top:8px">${impPreview()}</div>
+ <h2>Auto-Save to a File</h2><div class="box">${fs?`<p>${fh?'On. Every change is written to your Chosen File (Put it in a OneDrive or Google Drive folder). Status: <b>'+esc(autoMsg||'Ready')+'</b>':'Choose a File and Every change is written to it. Works in Chromium desktop browsers.'}</p><div class="row">${fh?'<button onclick="reAuto()">Re-Enable</button><button class="d" onclick="stopAuto()">Turn OFF</button>':'<button onclick="chooseAuto()">Choose File\u2026</button>'}</div>`:'<p class="mut">Not supported in this Browser (Chromium Desktop Only). Use JSON export Instead.</p>'}</div>
+ <h2>Persistent Storage</h2><div class="box"><p>Status: <b>${st.persisted==null?'Unknown':st.persisted?'Granted':'Not Granted'}</b></p>${st.persisted?'':'<button onclick="askPersist()">Request Persistent Storage</button>'}</div>`+vBk0()}
+(async function(){try{meta=(await kvGet('meta'))||{};fh=(await kvGet('fh'))||null;if(fh)autoMsg='Enabled (Checking Permission on next Save)'}catch(e){}metaReady=true;await checkAuto();hook()})();
+</script>
+<script>'use strict';
+/* Presentation only: theme toggle, "Saved" toast, highlight of just-saved rows. Wraps save()/render(); the original functions and all data code are untouched. */
+Object.assign(IC,{sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',moon:'<path d="M21 13A9 9 0 1 1 11 3a7 7 0 0 0 10 10z"/>',auto:'<circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/>'});
+const TH=['auto','light','dark'];let th='auto';try{th=localStorage.getItem('ex-theme')||'auto'}catch(e){}
+if(!TH.includes(th))th='auto';
+function applyTh(){const r=document.documentElement,b=document.getElementById('thm');th==='auto'?r.removeAttribute('data-theme'):r.setAttribute('data-theme',th);
+ b.innerHTML=ic(th==='auto'?'auto':th==='light'?'sun':'moon',20);const t='Theme: '+(th==='auto'?'Match System':th==='light'?'Light':'Dark')+' (Tap to Change)';b.title=t;b.setAttribute('aria-label',t)}
+document.getElementById('thm').onclick=()=>{th=TH[(TH.indexOf(th)+1)%3];try{localStorage.setItem('ex-theme',th)}catch(e){}applyTh()};applyTh();
+const tEl=document.createElement('div');tEl.id='toast';tEl.setAttribute('role','status');document.body.appendChild(tEl);let tT;
+function toast(m){tEl.innerHTML=ic('ob',18)+'<span>'+m+'</span>';tEl.classList.add('on');clearTimeout(tT);tT=setTimeout(()=>tEl.classList.remove('on'),2200)}
+const rec=()=>{const m={};data.transactions.concat(data.settlements).forEach(x=>m[x.id]=JSON.stringify(x));return m};let snap=null,hl=[];
+const _r0=render,_s0=save;
+render=function(){if(!snap)snap=rec();_r0();document.querySelector('.brand b').dataset.m=st.month;if(hl.length){hl.forEach(id=>{const r=[...document.querySelectorAll('#app tbody tr')].find(x=>x.firstElementChild&&x.firstElementChild.textContent===id);if(r){r.classList.add('nw');r.scrollIntoView({block:'nearest'})}});hl=[]}};
+save=async function(){const b=snap||rec();await _s0.apply(this,arguments);const n=rec(),ch=Object.keys(n).filter(k=>n[k]!==b[k]);snap=n;hl=ch.length&&ch.length<=3?ch:[];toast(Object.keys(n).length<Object.keys(b).length?'Deleted':'Saved')};
+</script>
+<script>if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}</script>
+</body></html>
