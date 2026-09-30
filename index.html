@@ -626,19 +626,19 @@ function exportXlsx(){if(typeof XLSX==='undefined')return alert('Excel export ne
  add('Budget',Object.entries(data.budgets).map(([m,b])=>({Month:m,...Object.fromEntries(E.BUCKETS.map(k=>[BN[k]+' allocation',R(b.alloc[k]||0)])),...Object.fromEntries(E.BUCKETS.map(k=>[BN[k]+' carry-in',b.carryIn&&b.carryIn[k]!=null?R(b.carryIn[k]):'auto'])),...Object.fromEntries(E.TRACKED.map(a=>['Opening '+a,R(b.opening[a]||0)]))})));
  XLSX.writeFile(wb,'ExTracker-'+localDate(new Date())+'.xlsx')}
 /* import */
+const sectionLbl=k=>({transactions:'Transactions',settlements:'Settlements',budgets:'Budgets'})[k]||k;
 async function pickImport(inp){const f=inp.files[0];if(!f)return;const r=E.parseImport(await f.text());inp.value='';
  if(r.error){st.imp={error:r.error,name:f.name};return render()}
  const inc=r.data,m=ExMerge.mergeData(data,inc),ids=(a)=>new Set(a.map(x=>x.id));
  const bad=inc.transactions.filter(t=>E.validateTx(t).errors.length).length+inc.settlements.filter(s=>E.validateSettlement(s).errors.length).length;
  const dup=['transactions','settlements'].some(k=>ids(inc[k]).size!==inc[k].length);
  const removed=['transactions','settlements'].reduce((n,k)=>{const i=ids(inc[k]);return n+data[k].filter(x=>!i.has(x.id)).length},0);
- const sectionLbl=k=>({transactions:'Transactions',settlements:'Settlements',budgets:'Budgets'})[k]||k;
  st.imp={name:f.name,inc,m,bad,dup,removed,counts:r.counts};render()}
 const brief=(k,x)=>k==='transactions'?`${x.date} ${x.category} ${x.description} ${$$(x.amount)} (${x.payerAccount})`:k==='settlements'?`${x.date} ${x.type} ${x.debtor}\u2192${x.originalCreditor} ${$$(x.amount)}`:'Budget '+JSON.stringify(x.alloc);
 function impPreview(){const i=st.imp;if(!i)return '';if(i.error)return `<div class="box"><span class="err">\u2716 ${esc(i.name)}: ${esc(i.error)}</span></div>`;
  const c=i.counts,m=i.m,cur={transactions:data.transactions.length,settlements:data.settlements.length,budgets:Object.keys(data.budgets).length};
  return `<div class="box"><b>${esc(i.name)}</b> is a valid ExTracker export.${i.dup?'<br><span class="err">\u2716 It contains duplicate IDs.</span>':''}${i.bad?`<br><span class="wrn">\u26A0 ${i.bad} record(s) fail validation (they will still import).</span>`:''}</div><br>`+
- tbl(['','In File','Currently Here','Merge: New','Merge: Identical'],['transactions','settlements','budgets'].map(k=>[sectionLbl(k),c[k],cur[k],m.added[k],m.identical[k]])+
+ tbl(['','In File','Currently Here','Merge: New','Merge: Identical'],['transactions','settlements','budgets'].map(k=>[sectionLbl(k),c[k],cur[k],m.added[k],m.identical[k]]))+
  `<div class="box" style="margin-top:8px"><b>Merge</b>: imported record wins on the same ID. ${m.conflicts.length?`<span class="wrn">${m.conflicts.length} conflict(s) will be overwritten:</span>`:'No conflicts.'}${m.conflicts.length?tbl(['ID','Here Now','Will Become'],m.conflicts.slice(0,25).map(x=>[x.id,esc(brief(x.kind,x.cur)),esc(brief(x.kind,x.inc))]))+(m.conflicts.length>25?`<p class="mut">\u2026and ${m.conflicts.length-25} more</p>`:''):''}<br><b>Replace</b>: current data is deleted first${i.removed?` (<span class="wrn">${i.removed} record(s) here are not in the file</span>)`:''}.<p class="mut">A snapshot of your current data downloads automatically before either action.</p>
  <div class="row"><button class="p" onclick="applyImp('merge')">Merge</button><button class="d" onclick="applyImp('replace')">Replace</button><button onclick="st.imp=null;render()">Cancel</button></div></div>`}
 async function applyImp(mode){const i=st.imp;if(i.dup&&!confirm('The file has duplicate IDs; the later record wins. Continue?'))return;
