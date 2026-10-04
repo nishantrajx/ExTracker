@@ -398,7 +398,33 @@ html.wl-on #wl{display:block}
 #thm{display:none}
 main#app[tabindex="-1"]:focus{outline:none}
 /* first heading of a tab sits the same distance under the header as the Dashboard cards (main already has 18px top padding) */
-main#app>h2:first-child{margin-top:0}
+main#app>h2:first-child{margin-top:-7px}
+/* focus: one slim accent border plus a soft halo (the old rule stacked a 2px outline, a 2px gap and a 4px halo) */
+input:focus-visible,select:focus-visible,textarea:focus-visible,#wl input:focus-visible{outline:0}
+input:focus,select:focus,textarea:focus{border-color:var(--ac);box-shadow:0 0 0 3px color-mix(in srgb,var(--ac) 16%,transparent)}
+/* Settlements pair rows: title + detail on the left, badge on the right of the same row */
+.pr{flex-wrap:nowrap;align-items:center}
+.prt{display:flex;flex-direction:column;gap:2px;min-width:0}
+.prt b{font-weight:650}
+.prt .mut{font-size:13px}
+.pr .tag{flex:none;margin-left:auto}
+/* Settings > Account card */
+#wl:focus{outline:none}
+.ac-row{display:flex;align-items:center;gap:14px}
+.ac-av{flex:none;width:48px;height:48px;border-radius:50%;display:grid;place-items:center;font-size:20px;font-weight:700;line-height:1;color:var(--ac);background:color-mix(in srgb,var(--ac) 16%,transparent);border:1px solid color-mix(in srgb,var(--ac) 38%,transparent)}
+.ac-av.off{color:var(--mut);background:color-mix(in srgb,var(--tx) 8%,transparent);border-color:color-mix(in srgb,var(--tx) 16%,transparent)}
+.ac-tx{min-width:0;display:flex;flex-direction:column;gap:3px}
+.ac-tx b{font-size:16px;line-height:1.25;overflow-wrap:anywhere}
+.ac-st{display:flex;align-items:center;gap:7px;font-size:13.5px;line-height:1.3;color:var(--mut)}
+.ac-dot{flex:none;width:8px;height:8px;border-radius:50%;background:var(--mut)}
+.ac-dot.ok{background:var(--ok)}.ac-dot.warn{background:var(--warn)}.ac-dot.err{background:var(--bad)}.ac-dot.busy{background:var(--ac)}
+.ac-hint{margin:14px 0 0;font-size:13.5px}
+.ac-cta{width:100%;margin-top:14px}
+.ac-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
+/* report share bars: bar plus percentage */
+.shr{display:flex;align-items:center;gap:8px;flex:1 1 auto;min-width:140px}
+.shr .bar{flex:1 1 auto;min-width:56px}
+.shr .pc{flex:none;min-width:2.9em;text-align:right;font-weight:600;font-size:13px;font-variant-numeric:tabular-nums}
 .ap-seg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
 .ap-seg button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:56px;padding:6px 0;font-size:13px;line-height:1.2;letter-spacing:-.01em;text-align:center}
 .ap-seg button .ic{vertical-align:0}
@@ -879,7 +905,7 @@ function editSe(id){const s=data.settlements.find(x=>x.id===id);st.se={...s,amou
 async function delSe(id){if(!confirm('Delete '+id+'?'))return;data.settlements=data.settlements.filter(x=>x.id!==id);await save();render()}
 function vSt(){const r=inM(data.settlements).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:a.id<b.id?-1:1),pr=E.checkPairs(data.settlements).filter(p=>r.some(s=>s.pairId===p.pairId));
  return `<h2>Settlements</h2><div class="row"><button class="p" onclick="st.se=newSe();st.view='sef';render()">+ Add Settlement</button></div>
- ${pr.length?`<div class="box">${pr.map(p=>`<div class="pr">Pair ${esc(p.pairId)}: ${$$(p.total)} across ${p.count} rows ${p.balanced?'<span class="OK tag">BALANCED</span>':'<span class="err tag">UNBALANCED</span>'}</div>`).join('')}</div>`:''}<br>`+
+ ${pr.length?`<div class="box">${pr.map(p=>`<div class="pr"><div class="prt"><b>Pair ${esc(p.pairId)}</b><span class="mut">${$$(p.total)} across ${p.count} rows</span></div>${p.balanced?'<span class="OK tag">BALANCED</span>':'<span class="err tag">UNBALANCED</span>'}</div>`).join('')}</div>`:''}<br>`+
  tbl(['ID','Date','Type','From \u2192 To','Bucket','Amount','Paid By','Received','Pair',''],r.map(s=>[s.id,E.fmtDate(s.date),TYPES[s.type]||s.type,esc(s.debtor)+' \u2192 '+esc(s.originalCreditor)+(s.creditorFunds?' ('+esc(fundsLbl(s.creditorFunds))+')':''),BN[s.bucket]||'',$$(s.amount),s.paidByAccount,s.receiverAccount,esc(s.pairId),`<div class="acts"><button class="ib" title="Edit" aria-label="Edit ${s.id}" onclick="editSe('${s.id}')">${ic('edit',18)}</button><button class="ib d" title="Delete" aria-label="Delete ${s.id}" onclick="delSe('${s.id}')">${ic('trash',18)}</button></div>`]))}
 /* obligations, balances, budget */
 function vOb(){const r=E.buildObligations(data).filter(o=>o.month===st.month);
@@ -898,8 +924,8 @@ async function saveBud(){const g=(p,k,blank)=>{const v=q('#'+p+'-'+k).value.trim
  try{const b={alloc:{},carryIn:{},opening:{}};E.BUCKETS.forEach(k=>{b.alloc[k]=g('a',k,0);b.carryIn[k]=g('c',k,null)});E.TRACKED.forEach(a=>b.opening[a]=g('o',a,0));data.budgets[st.month]=b;await save();go('dash')}catch(e){if(e!==0)throw e}}
 /* reports */
 function vRep(){const S=E.summary(data,st.month),tx=inM(data.transactions),pay={};tx.forEach(t=>{const k=t.payerAccount;pay[k]=pay[k]||{n:0,h:0,p:0};pay[k].n++;pay[k][t.expenseType==='HOUSEHOLD'?'h':'p']+=t.amount});
- return `<h2>Category Spending</h2>`+(()=>{const e=Object.entries(S.byCategory).sort((a,b)=>b[1]-a[1]),mx=e.length?e[0][1]:1;return tbl(['Category','Share','Amount'],e.map(([k,v])=>[esc(k),`<div class="bar" style="min-width:120px"><i style="width:${(v*100/mx).toFixed(1)}%;background:var(--ac)"></i></div>`,$$(v)]),' cv k2')})()+
- `<h2>Payer Summary</h2>`+(()=>{const e=Object.entries(pay).sort(),mx=Math.max(1,...e.map(([k,v])=>v.h+v.p));return tbl(['Payer','Transactions','Household','Personal','Total','Share'],e.map(([k,v])=>[k,v.n,$$(v.h),$$(v.p),$$(v.h+v.p),sb((v.h+v.p)*100/mx,'ac')]))})()+
+ return `<h2>Category Spending</h2>`+(()=>{const e=Object.entries(S.byCategory).sort((a,b)=>b[1]-a[1]),sm=Math.max(1,e.reduce((a,[,v])=>a+v,0));return tbl(['Category','Share','Amount'],e.map(([k,v])=>[esc(k),`<div class="shr"><div class="bar"><i style="width:${(v*100/sm).toFixed(1)}%;background:var(--ac)"></i></div><span class="pc">${(v*100/sm).toFixed(0)}%</span></div>`,$$(v)]),' cv k2')})()+
+ `<h2>Payer Summary</h2>`+(()=>{const e=Object.entries(pay).sort(),sm=Math.max(1,e.reduce((a,[k,v])=>a+v.h+v.p,0));return tbl(['Payer','Transactions','Household','Personal','Total','Share'],e.map(([k,v])=>[k,v.n,$$(v.h),$$(v.p),$$(v.h+v.p),`<div class="shr"><div class="bar"><i style="width:${((v.h+v.p)*100/sm).toFixed(1)}%;background:var(--ac)"></i></div><span class="pc">${((v.h+v.p)*100/sm).toFixed(0)}%</span></div>`]))})()+
  `<h2>Per-card Summary</h2>`+cardTbl(S.cards)+
  `<h2>Receivables by Creditor</h2>`+tbl(['Creditor','Total Obligation','Settled','Outstanding'],Object.entries(E.buildObligations(data).filter(o=>o.month===st.month).reduce((m,o)=>{const x=m[o.creditor]=m[o.creditor]||[0,0,0];x[0]+=o.obligation;x[1]+=o.settled;x[2]+=o.outstanding;return m},{})).map(([k,v])=>[k,...v.map($$)]),' cv k1')+
  `<h2>Bucket Performance</h2>`+tbl(['Bucket','Allocation','Carry-in','Spent','Remaining','Used','Status'],S.buckets.map(b=>[BN[b.bucket],$$(b.alloc),$$(b.carry),$$(b.spent),$$(b.remaining),sb(b.available>0?Math.min(100,b.spent*100/b.available):(b.spent>0?100:0),b.status==='NEGATIVE'?'bad':'ok'),badge(b.status)]))}
@@ -1074,7 +1100,7 @@ async function syGuard(qs){
  if(!syFirstDone){syFirstDone=true;
   if(!Object.keys(sbase).length&&hasLocal()&&qs.docChanges().some(c=>c.type!=='removed')){
    const f='ExTracker-before-first-sync-'+localDate(new Date())+'.json';
-   try{dl(f,E.exportJSON(data),'application/json');syNoteAdd('Before the first sync, a backup of this device\u2019s data was saved to your Downloads ('+f+'). Keep it until you have checked your data.')}catch(e){syNoteAdd('Could not download a backup before the first sync \u2013 please export one from Backup.')}}}
+   try{dl(f,E.exportJSON(data),'application/json');syNoteAdd('Before the first sync, a backup of this device\u2019s data was saved to your Downloads ('+f+'). Keep it until you have checked your data.')}catch(e){syNoteAdd('Could not download a backup before the first sync \u2013 please export one from File backup.')}}}
  const ch=clash(incoming(qs));
  if(ch.length){await afterChange();syNoteAdd(ch.length+' record'+(ch.length>1?'s':'')+' on this device had the same ID as a different cloud record and got new IDs (both are kept): '+ch.slice(0,6).map(c=>c.from+' \u2192 '+c.to).join(', ')+(ch.length>6?' \u2026':'')+'.');try{toast('Sync: '+ch.length+' record(s) got new IDs')}catch(e){}}
  syGate=false}
@@ -1191,9 +1217,19 @@ function apHtml(){const seg=OPT.map(o=>`<button type="button" class="${th===o[0]
 app.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-th]');if(!b||!app.contains(b))return;
  const v=b.dataset.th;if(!TH.includes(v))return;th=v;try{localStorage.setItem('ex-theme',th)}catch(x){}applyTh();
  app.querySelectorAll('.ap-seg [data-th]').forEach(x=>{const on=x.dataset.th===th;x.classList.toggle('on',on);x.setAttribute('aria-pressed',on?'true':'false')})});
+/* open the welcome screen from Settings and put focus inside it (the button that was clicked becomes inert) */
+window.acSignIn=function(){wlAgain();const w=document.getElementById('wl');if(w){w.setAttribute('tabindex','-1');try{w.focus({preventScroll:true})}catch(e){}w.addEventListener('blur',()=>w.removeAttribute('tabindex'),{once:true})}};
+/* Account card built from the sync state (suser, sState, sMsg). Signing in happens on the welcome screen (wlAgain); Sync Now / Sign Out use the existing syncPush / syOut. */
+function acHtml(extra){const head=(off,inner,t,sub)=>`<div class="ac-row"><span class="ac-av${off?' off':''}" aria-hidden="true">${inner}</span><div class="ac-tx">${t}${sub}</div></div>`;let b;
+ if(sState==='nofb')b=head(1,ic('user',24),'<b>Cloud sync unavailable</b>','<span class="ac-st">Working on this device. Sync resumes when you are online.</span>');
+ else if(sState==='init')b=head(1,ic('user',24),'<b>Checking account\u2026</b>','');
+ else if(!suser)b=head(1,ic('user',24),'<b>Not signed in</b>','<span class="ac-st">Your data is saved on this device only.</span>')+'<p class="mut ac-hint">Sign in to back up your data and keep your devices in sync.</p><button type="button" class="p ac-cta" onclick="acSignIn()">Sign In</button>';
+ else{const em=suser.email||'',raw=sMsg||(sState==='on'?'Connected':'Connecting\u2026'),ok=/^Synced/.test(raw),cls=ok?'ok':/^Offline/.test(raw)?'warn':/error|not allowed/i.test(raw)?'err':'busy',txt=ok?'Synced \u00b7 '+raw.slice(7).replace(/(\d{1,2}:\d{2}):\d{2}/,'$1'):raw;
+  b=head(0,esc((em[0]||'?').toUpperCase()),`<b>${esc(em)}</b>`,`<span class="ac-st" role="status"><i class="ac-dot ${cls}" aria-hidden="true"></i><span>${esc(txt)}</span></span>`)+'<div class="ac-btns"><button type="button" onclick="syncPush()">Sync Now</button><button type="button" class="d" onclick="syOut()">Sign Out</button></div><p class="mut ac-hint">Signing out keeps this device\u2019s data.</p>'}
+ return '<h2>Account</h2><div class="box">'+b+extra+'</div>'}
 const _vBk3=vBk;vBk=function(){let h=_vBk3.apply(this,arguments),acc='';const a=h.indexOf('<h2>Cloud Sync</h2>'),b=a<0?-1:h.indexOf('<h2>Export</h2>',a);
- if(a>=0&&b>a){acc=h.slice(a,b).replace('<h2>Cloud Sync</h2>','<h2>Account</h2>');h=h.slice(0,a)+h.slice(b)}
- return h.replace('<h2>Backup</h2>',()=>apHtml()+acc+'<h2>Backup</h2>')};
+ if(a>=0&&b>a){acc=acHtml((h.slice(a,b).match(/<div class="syn"[^>]*>[\s\S]*?<\/div>/g)||[]).join(''));h=h.slice(0,a)+h.slice(b)}
+ return h.replace('<h2>Backup</h2>',()=>acc+apHtml()+'<h2>Backup</h2>')};
 /* if the first render ran before this script defined vBk (see the early guard script), draw the screen now */
 if(window.__exMiss){window.__exMiss=false;try{render()}catch(e){}}
 })();
@@ -1212,6 +1248,73 @@ let raf=0;function run(){raf=0;app.querySelectorAll('input:not([type=file]):not(
 new MutationObserver(()=>{if(!raf)raf=requestAnimationFrame(run)}).observe(app,{childList:true,subtree:true});run();
 app.addEventListener('click',e=>{const l=e.target&&e.target.closest&&e.target.closest('label');if(!l||l.htmlFor||l.querySelector('input,select,textarea')||!app.contains(l))return;
  const c=l.parentElement&&l.parentElement.querySelector('input:not([type=file]),select,textarea');if(c)c.focus()});
+})();
+</script>
+<style>/* Header status, softer backup banner and status card. Screen only; no variables redefined. */
+@media screen{
+.brand #lb .hs{display:inline-flex;align-items:center;gap:6px;margin-left:4px;font-weight:650;vertical-align:baseline}
+.brand #lb .hs i{width:8px;height:8px;border-radius:50%;background:currentColor;flex:none;box-shadow:0 0 0 2px color-mix(in srgb,currentColor 22%,transparent)}
+.brand #lb .hs.on{color:var(--ok)}.brand #lb .hs.off{color:var(--bad)}
+.ban .bn-b{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+}
+</style>
+<script>'use strict';
+/* Cloud is the main backup; JSON export is the secondary copy.
+   1. Header: signed in = "Status: Online/Offline" (green/red); signed out = the existing "Last Backup".
+   2. Top banner: softer. Signed in = only if no successful sync for 7+ days. Signed out = after 14 days, with Sign In + Export Now.
+   3. Settings status card: cloud wording when signed in.
+   The time of the last successful sync is kept in kv 'lastSync' (not part of the exported data). Wraps hook, ui, pushAll, syOut and vBk;
+   touches no calculation, storage format, import/export, merge or Firestore code. */
+(function(){const FL='ex-acct',T0=Date.now();let lastSync=null;
+const flag=()=>{try{return localStorage.getItem(FL)==='1'}catch(e){return false}},setF=v=>{try{v?localStorage.setItem(FL,'1'):localStorage.removeItem(FL)}catch(e){}};
+Object.assign(IC,{cloud:'<path d="M7 18a4 4 0 0 1-.6-7.96A5.5 5.5 0 0 1 17.2 8.6 4.7 4.7 0 0 1 17.5 18z"/>'});
+/* signed in, or very likely signed in (session restoring, or Firebase could not load while offline) */
+const acct=()=>!!suser||(flag()&&(sState!=='off'||Date.now()-T0<8000));
+/* Online = signed in and the last sync attempt did not fail. Browser-offline, Firebase unavailable, or a failed sync caused by no real connection = Offline; other errors (e.g. not allowed) = Sync error. */
+const NETRX=/offline|unavailable|network|timeout|timed out|deadline|failed to fetch/i;
+const net=()=>{if(navigator.onLine===false||sState==='nofb')return 'off';if(!suser)return 'on';const m=sMsg||'';
+ if(sState==='err'||/^Sync error|not allowed/.test(m))return(NETRX.test(m)&&!/not allowed/.test(m))?'off':'err';return /^Offline/.test(m)?'off':'on'};
+const fmtS=i=>{const d=new Date(i);return E.fmtDate(localDate(d)).slice(0,6)+', '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')};
+function statusHdr(){const lb=q('#lb');if(!lb)return;const k=net(),tx=k==='on'?'Online':k==='off'?'Offline':'Sync error';
+ lb.innerHTML='Status: <span class="hs '+(k==='on'?'on':'off')+'"><i aria-hidden="true"></i>'+tx+'</span>';
+ lb.title=k==='on'?'Signed in \u00b7 Online'+(lastSync?' \u00b7 Last synced '+fmtS(lastSync):''):k==='off'?'Signed in \u00b7 Offline. Changes are saved on this device and sync when you are back online.':'Signed in \u00b7 '+(sMsg||'Sync error')}
+function banner(){const b=q('#ban');if(!b||!metaReady)return;
+ let h=[...b.children].filter(x=>/Auto-Save is Paused/.test(x.textContent)).map(x=>x.outerHTML).join('');
+ if(hasData()){
+  if(acct()){const d=daysSince(lastSync);if(lastSync&&d>7)h+=`<div class="ban">\u26A0 Not synced for ${Math.floor(d)} days. Your latest changes are saved on this device. <button class="p" onclick="syncPush()">Sync Now</button></div>`}
+  else if(sState!=='init'){const l=lastBk(),d=daysSince(l);
+   if(d>14)h+=`<div class="ban"><span>\u26A0 Your data is only saved on this device. ${l?'Last backup was '+Math.floor(d)+' days ago.':'No backup yet.'}</span><span class="bn-b">${sState==='nofb'?'':'<button onclick="acSignIn()">Sign In</button>'}<button class="p" onclick="doExport()">Export Now</button></span></div>`}}
+ b.innerHTML=h}
+const _hook0=hook;
+function refresh(){try{if(metaReady)_hook0.call(window);if(acct())statusHdr();banner();
+ if(!suser&&flag()&&sState==='off'&&Date.now()-T0>=8000)setF(false);if(suser)setF(true)}catch(e){}}
+hook=function(){refresh()};
+const _ui=ui;ui=function(){_ui.apply(this,arguments);refresh()};
+const _pa=pushAll;pushAll=async function(){const b=sMsg,r=await _pa.apply(this,arguments);
+ if(suser&&sMsg!==b&&/^Synced/.test(sMsg)){lastSync=new Date().toISOString();try{await kvPut('lastSync',lastSync)}catch(e){}}return r};
+const _so=syOut;syOut=async function(){setF(false);lastSync=null;try{await kvPut('lastSync',null)}catch(e){}return _so.apply(this,arguments)};
+kvGet('lastSync').then(v=>{if(v){lastSync=v;refresh();ui()}}).catch(()=>{});
+addEventListener('online',refresh);addEventListener('offline',refresh);setTimeout(refresh,8100);
+/* Settings status card (replaces only the hero box of the Backup section; the paused-auto-save warning and its button are kept) */
+function hero(cls,ic0,title,sub,btn){return `<div class="box hero ${cls}"><div class="hi">${ic(ic0,28)}</div><div><b style="font-size:18px">${title}</b><div class="mut">${sub}</div>${btn||''}</div></div>`}
+const _vBk5=vBk;vBk=function(){let h=_vBk5.apply(this,arguments);const a=h.indexOf('<div class="box hero '),b=h.indexOf('<div class="grid" style="margin-top:12px">');if(a<0||b<a)return h;
+ const l=lastBk(),dl0=daysSince(l),exp=l?'Last file backup <b>'+E.fmtDate(localDate(l))+'</b>':'No file backup yet';let x;
+ if(fh&&autoNeed)x=hero('wnb','warn','Auto-Save is Paused','The browser needs your permission again, so changes are not being written to your auto-save file.','<div style="margin-top:8px"><button class="p" onclick="reAuto()">Re-enable Auto-Save</button></div>');
+ else if(acct()){const ds=daysSince(lastSync);
+  if(!lastSync)x=hero('','cloud','Waiting for the first sync','Your data is saved on this device and will sync when you are online. '+exp+'.');
+  else if(ds>7)x=hero('wnb','warn','Not synced for '+Math.floor(ds)+' days','Last synced <b>'+fmtS(lastSync)+'</b>. Open the app online, or tap Sync Now in Account.');
+  else x=hero('okb','cloud','Your data is backed up in the cloud','Last synced <b>'+fmtS(lastSync)+'</b>. A JSON export now and then is a good extra copy ('+exp+').')}
+ else if(l&&dl0<=14)x=hero('okb','bk','Your data is backed up','Last file backup <b>'+E.fmtDate(localDate(l))+'</b>. Sign in to also keep a cloud copy.');
+ else x=hero('wnb','warn','Only on this device','Sign in to back up to the cloud, or export a JSON file. '+(l?exp:'You have not exported a file yet')+'. Browsers can clear site data.');
+ return h.slice(0,a)+x+'\n '+h.slice(b)};
+/* Account card: after a restart, until the first sync result arrives, show the saved time of the last successful sync instead of only "Connecting\u2026".
+   Section heading "Backup" is renamed "File backup" (the cloud is now the main backup). */
+const fmtC=i=>{const d=new Date(i);return localDate(d)===localDate(new Date())?d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}):fmtS(i)};
+const _vBk6=vBk;vBk=function(){let h=_vBk6.apply(this,arguments);
+ h=h.replace('<h2>Backup</h2>','<h2>File backup</h2>');
+ if(suser&&lastSync)h=h.replace(/<i class="ac-dot busy" aria-hidden="true"><\/i><span>(?:Connecting\u2026|Connected)<\/span>/,()=>'<i class="ac-dot busy" aria-hidden="true"></i><span>Last synced \u00b7 '+fmtC(lastSync)+'</span>');
+ return h};
+refresh();
 })();
 </script>
 <script>if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}</script>
