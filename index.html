@@ -430,6 +430,64 @@ input:focus,select:focus,textarea:focus{border-color:var(--ac);box-shadow:0 0 0 
 .ap-seg button .ic{vertical-align:0}
 .ap-hint{margin:10px 0 0}
 }
+/* ===== Round 2 (additive; screen only; no variables redefined) ===== */
+/* A. Touch screens keep :hover after a tap, so a tapped control stayed highlighted. Neutralise hover looks there; desktop hover is untouched. */
+@media screen and (hover:none){
+nav button:not(.on):hover{background:transparent;color:var(--mut)}
+button:not(.p):not(.on):not(.ib):hover{border-color:color-mix(in srgb,var(--tx) 14%,var(--bd))}
+button.p:hover{filter:none}
+.ib:hover{background:color-mix(in srgb,var(--tx) 6%,transparent)}
+.ib.d:hover{background:color-mix(in srgb,var(--bad) 12%,transparent);border-color:transparent}
+tbody tr:hover{background:transparent}
+.top .mo:hover{border-color:var(--bd)}
+.box label.filepick.filepick:hover{border-style:dashed;border-color:color-mix(in srgb,var(--ac) 60%,var(--bd));background:color-mix(in srgb,var(--ac) 7%,var(--card))}
+#wl .wl-eye:hover{color:var(--mut);background:transparent}
+#wl .wl-sk:hover{border-color:color-mix(in srgb,var(--tx) 26%,var(--bd));color:var(--tx)}
+}
+/* B. Settings: status card first in Account; File backup starts with one calm line */
+@media screen{
+.hero+.box{margin-top:12px}
+.hero-x{margin-top:4px;font-size:13.5px}
+.fb-line{margin:0;font-size:14px}
+.hero+.fb-line{margin-top:12px}
+}
+/* D. Transactions: compact "+ Add" on the right of the summary line */
+@media screen{
+#app>.row:has(>button.p[onclick*="go('txf')"]){position:relative;margin-bottom:0}
+#app>.row>button.p[onclick*="go('txf')"]{position:absolute;right:0;top:calc(100% + 8px);flex:none;width:auto;min-width:92px;min-height:44px;margin:0;padding:0 18px}
+#txl>p.mut:first-child{display:flex;align-items:center;min-height:44px;margin:8px 0;padding-right:108px}
+}
+/* E. Bottom bar on phones: Dashboard, Transactions, Add, Hub, Settings. The five moved screens stay in the DOM (same ids and handlers) and are reached through Hub. */
+@media screen and (max-width:1139px){
+nav button[onclick="go('st')"],nav button[onclick="go('ob')"],nav button[onclick="go('bal')"],nav button[onclick="go('bud')"],nav button[onclick="go('rep')"]{display:none}
+nav button[onclick="go('dash')"]{order:1}
+nav button[onclick="go('tx')"]{order:2}
+nav button[onclick="go('txf')"]{order:3}
+nav button[onclick="go('hub')"]{order:4}
+nav button[onclick="go('bk')"]{order:5}
+header::after{--fr:0px}
+}
+@media screen and (min-width:1140px){nav button[onclick="go('hub')"]{display:none}}
+@media screen{
+.hub{display:grid;gap:10px}
+.hub-row{display:flex;align-items:center;gap:14px;width:100%;min-height:64px;padding:10px 14px;text-align:left;border-radius:18px;background:var(--card);box-shadow:var(--sh)}
+.hub-ic{flex:none;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--acs);color:var(--ac)}
+.hub-tx{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:1px}
+.hub-tx b{font-size:16px;font-weight:650;line-height:1.25}
+.hub-tx .mut{font-size:13.5px;line-height:1.3}
+.hub-ch{flex:none;color:var(--mut);display:grid;place-items:center}
+}
+@media screen and (hover:hover){.hub-row:hover{border-color:var(--ac)}}
+/* F. Pull down to sync: small status pill (screen only; the gesture code is in the last script block) */
+@media screen{
+#ptr{position:fixed;left:50%;top:0;z-index:8;display:flex;align-items:center;gap:8px;min-height:36px;padding:0 16px;border-radius:99px;background:var(--card);color:var(--tx);border:1px solid color-mix(in srgb,var(--tx) 14%,var(--bd));box-shadow:var(--sh);font-size:14px;font-weight:600;white-space:nowrap;pointer-events:none;opacity:0;visibility:hidden;transform:translate(-50%,-60px);transition:opacity .2s,transform .2s}
+#ptr.vis{visibility:visible}
+#ptr.drag{transition:none}
+#ptr .ptr-sp{display:none;flex:none;width:14px;height:14px;border-radius:50%;border:2px solid color-mix(in srgb,var(--ac) 30%,transparent);border-top-color:var(--ac);animation:ptrsp .8s linear infinite}
+#ptr.go .ptr-sp{display:block}
+}
+@keyframes ptrsp{to{transform:rotate(360deg)}}
+@media screen and (prefers-reduced-motion:reduce){#ptr{transition:none}#ptr .ptr-sp{animation:none;border-top-color:color-mix(in srgb,var(--ac) 30%,transparent);border-right-color:var(--ac)}}
 </style></head><body>
 <script>/* Welcome screen: show before first paint unless the choice is remembered (flag 'ex-welcome', same style as 'ex-theme'). */
 (function(){var s=true;try{s=localStorage.getItem('ex-welcome')!=='1'}catch(e){}
@@ -788,7 +846,7 @@ const CAT_H=['Rent','Transport','Bills','Food','Groceries','Shopping'],CAT_P=['P
 const OBL=['REIMBURSEMENT','PERSONAL_SETTLEMENT','PERSONAL_CARD_RESTORATION','CROSS_SETTLEMENT'];
 const TYPES={REIMBURSEMENT:'Reimbursement',PERSONAL_SETTLEMENT:'Personal Settlement',PERSONAL_CARD_RESTORATION:'Personal Card Restoration',CROSS_SETTLEMENT:'Cross Settlement',CARD_BILL_PAYMENT:'Card Bill Payment',TRANSFER:'Transfer'};
 const BN={RENT:'Rent',TRANSPORT_BILLS:'Transport & Bills',FOOD_GROCERY_SHOPPING:'Food, Groceries & Shopping',PERSONAL:'Personal'};
-const VIEWS=[['dash','Dashboard'],['txf','+ Add'],['tx','Transactions'],['st','Settlements'],['ob','Obligations'],['bal','Balances'],['bud','Budget'],['rep','Reports'],['bk','Settings']];
+const HUB_LABEL='Hub';const VIEWS=[['dash','Dashboard'],['txf','+ Add'],['tx','Transactions'],['st','Settlements'],['ob','Obligations'],['bal','Balances'],['bud','Budget'],['rep','Reports'],['hub',HUB_LABEL],['bk','Settings']];
 let data={transactions:[],settlements:[],budgets:{},settings:{cardPoolCap:null}},st={view:'dash',month:'',tx:null,se:null,f:{cat:'',payer:'',who:'',q:''},persisted:null};
 /* storage (IndexedDB) */
 const idb=()=>new Promise((ok,no)=>{const r=indexedDB.open('extracker',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)});
@@ -817,7 +875,7 @@ function mLbl(m){const a=String(m||'').split('-'),n=['Jan','Feb','Mar','Apr','Ma
 function setMonth(m){if(m){st.month=m;render()}}
 function render(){q('#nav').innerHTML=VIEWS.map(([k,l])=>{const on=st.view===k||(k==='st'&&st.view==='sef')||(k==='txf'&&st.view==='txf');return `<button class="${on?'on':''}" ${on?'aria-current="page"':''} onclick="go('${k}')">${ic(k)}<span>${l.replace('+ ','')}</span></button>`}).join('');
  const activeNav=q('#nav button.on');if(activeNav&&window.innerWidth<=1139)activeNav.scrollIntoView({inline:'center',block:'nearest'});
- q('#mon').value=st.month;q('#monl').textContent=mLbl(st.month);q('#app').innerHTML=({dash:vDash,txf:vTxForm,tx:vTx,st:vSt,sef:vSeForm,ob:vOb,bal:vBal,bud:vBud,rep:vRep,bk:vBk})[st.view]();if(typeof hook==='function')hook()}
+ q('#mon').value=st.month;q('#monl').textContent=mLbl(st.month);q('#app').innerHTML=({dash:vDash,txf:vTxForm,tx:vTx,st:vSt,sef:vSeForm,ob:vOb,bal:vBal,bud:vBud,rep:vRep,bk:vBk,hub:window.vHub})[st.view]();if(typeof hook==='function')hook()}
 /* dashboard */
 function vDash(){const S=E.summary(data,st.month),p=S.pool,obs=E.buildObligations(data).filter(o=>o.month===st.month);
  if(!data.transactions.length)return `<div class="empty">${ic('rep',44)}<h2>No Data Yet</h2><p>Import your backup file, or add a transaction.</p><button class="p" onclick="go('bk')">Open Settings</button></div>`;
@@ -1298,15 +1356,18 @@ addEventListener('online',refresh);addEventListener('offline',refresh);setTimeou
 /* Settings status card (replaces only the hero box of the Backup section; the paused-auto-save warning and its button are kept) */
 function hero(cls,ic0,title,sub,btn){return `<div class="box hero ${cls}"><div class="hi">${ic(ic0,28)}</div><div><b style="font-size:18px">${title}</b><div class="mut">${sub}</div>${btn||''}</div></div>`}
 const _vBk5=vBk;vBk=function(){let h=_vBk5.apply(this,arguments);const a=h.indexOf('<div class="box hero '),b=h.indexOf('<div class="grid" style="margin-top:12px">');if(a<0||b<a)return h;
- const l=lastBk(),dl0=daysSince(l),exp=l?'Last file backup <b>'+E.fmtDate(localDate(l))+'</b>':'No file backup yet';let x;
- if(fh&&autoNeed)x=hero('wnb','warn','Auto-Save is Paused','The browser needs your permission again, so changes are not being written to your auto-save file.','<div style="margin-top:8px"><button class="p" onclick="reAuto()">Re-enable Auto-Save</button></div>');
- else if(acct()){const ds=daysSince(lastSync);
-  if(!lastSync)x=hero('','cloud','Waiting for the first sync','Your data is saved on this device and will sync when you are online. '+exp+'.');
-  else if(ds>7)x=hero('wnb','warn','Not synced for '+Math.floor(ds)+' days','Last synced <b>'+fmtS(lastSync)+'</b>. Open the app online, or tap Sync Now in Account.');
-  else x=hero('okb','cloud','Your data is backed up in the cloud','Last synced <b>'+fmtS(lastSync)+'</b>. A JSON export now and then is a good extra copy ('+exp+').')}
- else if(l&&dl0<=14)x=hero('okb','bk','Your data is backed up','Last file backup <b>'+E.fmtDate(localDate(l))+'</b>. Sign in to also keep a cloud copy.');
- else x=hero('wnb','warn','Only on this device','Sign in to back up to the cloud, or export a JSON file. '+(l?exp:'You have not exported a file yet')+'. Browsers can clear site data.');
- return h.slice(0,a)+x+'\n '+h.slice(b)};
+ const l=lastBk(),dl0=daysSince(l),exp=l?'Last file backup <b>'+E.fmtDate(localDate(l))+'</b>':'No file backup yet';let x,pz='';
+ /* the paused-auto-save warning stays in the File backup section; the cloud / device status card goes first in Account */
+ if(fh&&autoNeed)pz=hero('wnb','warn','Auto-Save is Paused','The browser needs your permission again, so changes are not being written to your auto-save file.','<div style="margin-top:8px"><button class="p" onclick="reAuto()">Re-enable Auto-Save</button></div>');
+ if(acct()){const ds=daysSince(lastSync);
+  if(!lastSync)x=hero('','cloud','Waiting for the first sync','Saved on this device. It will sync when you are online.');
+  else if(ds>7)x=hero('wnb','warn','Not synced for '+Math.floor(ds)+' days','Last synced <b>'+fmtS(lastSync)+'</b>. Go online or tap Sync Now.');
+  else x=hero('okb','cloud','Your data is backed up in the cloud','Last synced <b>'+fmtS(lastSync)+'</b>','<div class="mut hero-x">An occasional JSON export is a good extra copy.</div>')}
+ else if(l&&dl0<=14)x=hero('okb','bk','Your data is backed up','Sign in to also keep a cloud copy.');
+ else x=hero('wnb','warn','Only on this device','Sign in to back up to the cloud, or export a JSON file.','<div class="mut hero-x">Browsers can clear site data.</div>');
+ const fl='<p class="mut fb-line">'+exp+'</p>',ai=h.indexOf('<h2>Account</h2>');
+ if(ai>=0&&ai<a){h=h.slice(0,a)+pz+fl+'\n '+h.slice(b);return h.replace('<h2>Account</h2>',()=>'<h2>Account</h2>'+x)}
+ return h.slice(0,a)+x+pz+fl+'\n '+h.slice(b)};
 /* Account card: after a restart, until the first sync result arrives, show the saved time of the last successful sync instead of only "Connecting\u2026".
    Section heading "Backup" is renamed "File backup" (the cloud is now the main backup). */
 const fmtC=i=>{const d=new Date(i);return localDate(d)===localDate(new Date())?d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}):fmtS(i)};
@@ -1315,6 +1376,58 @@ const _vBk6=vBk;vBk=function(){let h=_vBk6.apply(this,arguments);
  if(suser&&lastSync)h=h.replace(/<i class="ac-dot busy" aria-hidden="true"><\/i><span>(?:Connecting\u2026|Connected)<\/span>/,()=>'<i class="ac-dot busy" aria-hidden="true"></i><span>Last synced \u00b7 '+fmtC(lastSync)+'</span>');
  return h};
 refresh();
+})();
+</script>
+<script>'use strict';
+/* Round 2 (additive): Hub tab and its view, Hub highlight on its sub-screens, month-specific empty-state texts.
+   Calls only go() and render(); touches no data, storage, backup or sync code. The tab label is HUB_LABEL (one constant, defined next to VIEWS). */
+(function(){
+Object.assign(IC,{hub:'<circle cx="12" cy="12" r="2.6"/><circle cx="5" cy="5.5" r="1.8"/><circle cx="19" cy="5.5" r="1.8"/><circle cx="5" cy="18.5" r="1.8"/><circle cx="19" cy="18.5" r="1.8"/><path d="M10.2 10.2L6.4 6.8M13.8 10.2l3.8-3.4M10.2 13.8l-3.8 3.4M13.8 13.8l3.8 3.4"/>',chev:'<path d="M9 6l6 6-6 6"/>'});
+const ROWS=[['st','Settlements','Record who paid whom'],['ob','Obligations','What is owed and what is settled'],['bal','Balances','Tracked account balances'],['bud','Budget','Monthly allocations and carry-in'],['rep','Reports','Spending by category, payer and card']];
+window.vHub=function vHub(){return '<h2>'+esc(HUB_LABEL)+'</h2><div class="hub">'+ROWS.map(r=>'<button type="button" class="hub-row" onclick="go(\''+r[0]+'\')"><span class="hub-ic">'+ic(r[0],22)+'</span><span class="hub-tx"><b>'+r[1]+'</b><span class="mut">'+r[2]+'</span></span><span class="hub-ch">'+ic('chev',20)+'</span></button>').join('')+'</div>'};
+/* Hub is the active tab on Hub itself and on every screen inside it */
+const SUB=['hub','st','sef','ob','bal','bud','rep'];
+function hubOn(){try{const b=q('#nav button[onclick="go(\'hub\')"]');if(!b)return;const on=SUB.includes(st.view);b.classList.toggle('on',on);if(on)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')}catch(e){}}
+/* empty tables: month-specific text (only where the list is month-scoped; a filtered Transactions list keeps the generic text) */
+const EMP={tx:'No transactions this month',st:'No settlements this month',ob:'No obligations this month'};
+function empt(){try{const m=EMP[st.view];if(!m)return;if(st.view==='tx'){const f=st.f||{};if(f.q||f.cat||f.payer||f.who)return}
+ document.querySelectorAll('#app td.em').forEach(td=>{if(td.textContent==='Nothing here yet')td.textContent=m})}catch(e){}}
+const _r17=render;render=function(){_r17.apply(this,arguments);hubOn();empt()};
+const app=document.getElementById('app');if(app&&window.MutationObserver)new MutationObserver(empt).observe(app,{childList:true,subtree:true});
+hubOn();empt();
+})();
+</script>
+<script>'use strict';
+/* Pull down to sync (additive; phone layout only). When signed in and online, a downward pull that starts at the very top of the page and passes 70px
+   calls the existing syncPush() once. Passive touch listeners; never prevents scrolling; the page is not reloaded (html/body already have overscroll-behavior-y:none).
+   Reads suser, fdb, sq, sMsg; calls only syncPush() and toast(). Sync Now in Settings stays the accessible alternative. */
+(function(){
+const THR=70;let el=null,g=null,busy=false,hT=0;
+const top0=()=>(document.scrollingElement||document.documentElement).scrollTop;
+function mk(){if(el)return el;el=document.createElement('div');el.id='ptr';el.setAttribute('aria-hidden','true');el.innerHTML='<i class="ptr-sp"></i><span></span>';document.body.appendChild(el);return el}
+const lab=t=>{mk().lastChild.textContent=t};
+function place(dy,full){const e=mk(),h=document.querySelector('header');e.style.top=((h?Math.round(h.getBoundingClientRect().bottom):0)+8)+'px';
+ e.style.transform='translate(-50%,'+(full?0:Math.min(dy*.6,60)-60)+'px)';e.style.opacity=full?1:Math.min(1,dy/40);e.classList.add('vis')}
+function hide(){clearTimeout(hT);if(!el)return;el.classList.remove('vis','drag','go');el.style.opacity=0;el.setAttribute('aria-hidden','true')}
+function cancel(){g=null;if(!busy)hide()}
+function can(t){if(innerWidth>1139||busy)return false;if(document.documentElement.classList.contains('wl-on'))return false;
+ if(typeof suser==='undefined'||!suser||typeof fdb==='undefined'||!fdb||navigator.onLine===false)return false;if(top0()>0)return false;
+ if(!t||!t.closest||t.closest('input,select,textarea,[contenteditable],#wl,.mo,.abar,#nav,#toast,#ptr'))return false;
+ for(let n=t;n&&n!==document.body&&n!==document.documentElement;n=n.parentElement){const c=getComputedStyle(n);
+  if(/(auto|scroll)/.test(c.overflowX)&&n.scrollWidth>n.clientWidth+1)return false;if(/(auto|scroll)/.test(c.overflowY)&&n.scrollHeight>n.clientHeight+1&&n.scrollTop>0)return false}
+ return true}
+document.addEventListener('touchstart',e=>{g=null;if(e.touches.length!==1||!can(e.target))return;g={x:e.touches[0].clientX,y:e.touches[0].clientY,dy:0,on:false}},{passive:true});
+document.addEventListener('touchmove',e=>{if(!g)return;if(e.touches.length!==1||top0()>0)return cancel();
+ const t=e.touches[0],dx=t.clientX-g.x,dy=t.clientY-g.y;
+ if(dy<-6||(!g.on&&Math.abs(dx)>12&&Math.abs(dx)>Math.abs(dy)*1.5))return cancel();
+ if(!g.on&&dy>10&&dy>Math.abs(dx)*1.5){g.on=true;mk().classList.add('drag')}
+ if(!g.on)return;g.dy=dy;lab(dy>=THR?'Release to sync':'Pull to sync');place(dy)},{passive:true});
+document.addEventListener('touchend',()=>{const x=g;g=null;if(x&&x.on&&x.dy>=THR)run();else if(x)cancel()},{passive:true});
+document.addEventListener('touchcancel',cancel,{passive:true});
+async function run(){busy=true;const e=mk();e.classList.remove('drag');e.classList.add('go');e.setAttribute('aria-hidden','false');lab('Syncing\u2026');place(0,true);
+ try{syncPush();await sq}catch(x){}
+ if(typeof sMsg==='string'&&/^Synced/.test(sMsg)){busy=false;hide();toast('Synced')}
+ else{lab(navigator.onLine===false?'Offline':'Could not sync');e.classList.remove('go');e.setAttribute('aria-hidden','false');hT=setTimeout(()=>{busy=false;hide()},2200)}}
 })();
 </script>
 <script>if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}</script>
