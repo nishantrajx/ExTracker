@@ -5,7 +5,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#161f1c" media="(prefers-color-scheme: dark)"><meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
 <link rel="icon" href="icon-192.png">
-<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-maskable-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <style>
 :root{--bg:#f2f4f1;--card:#fff;--tx:#14201d;--mut:#5c6b67;--bd:#dde3df;--ac:#0d6b5a;--onac:#fff;--acs:#e3f1ed;--ok:#14794f;--bad:#b83a22;--warn:#9a5b00;--neo:#3565c9;--pre:#b84f86;--sh:0 1px 2px rgba(20,32,29,.06),0 4px 14px rgba(20,32,29,.05);--c1:#0d6b5a;--c2:#3565c9;--c3:#d08a1c;--c4:#b84f86;--c5:#6b7fd7;--c6:#7a9a3a;--c7:#c4573a;--c8:#7b8794;--banbg:#fff4d6;--banbd:#efd489;--bantx:#5c4200;box-sizing:border-box;color-scheme:light dark}
@@ -1449,5 +1449,45 @@ async function run(){busy=true;const e=mk();e.classList.remove('drag');e.classLi
 .cv td>.shr>.bar{grid-row:2;grid-column:1/-1;min-width:0;width:100%}
 }
 </style>
+<script>/* Back gesture inside Hub (phone layout only). History API, URL never changes. History depth mirrors screen depth:
+   Hub-section lists (st ob bal bud rep) = 1, settlement form (sef) = 2, everything else = 0. Reconciled after every render:
+   missing levels are pushed (user taps), extra levels are popped silently (history.go(-n) + ignore counter).
+   A real Back (popstate): sef -> Settlements list, Hub-section list -> Hub list. Changes only which screen is shown, never data. */
+(function(){
+var SEC=['st','ob','bal','bud','rep'],cur=0,ign=0,exp=[],dirty=false,tm=null;
+function phone(){return window.innerWidth<=1139}
+function want(){var v=st.view;return v==='sef'?2:SEC.indexOf(v)>=0?1:0}
+function hs(){var s=history.state;return s&&typeof s.exd==='number'?s.exd:0}
+function arm(){if(tm)clearTimeout(tm);tm=setTimeout(function(){tm=null;if(ign>0){ign=0;exp=[];cur=hs();dirty=false;rec()}},1500)}
+function rec(){
+ if(!phone())return;
+ if(ign>0){dirty=true;return}
+ var w=want();
+ while(cur<w){try{history.pushState({exd:cur+1},'');cur++}catch(e){cur=w}}
+ if(cur>w){var n=cur-w;ign++;exp.push(w);cur=w;arm();try{history.go(-n)}catch(e){ign--;exp.pop()}}
+}
+var _rb=render;
+render=function(){var r=_rb.apply(this,arguments);try{rec()}catch(e){}return r};
+addEventListener('popstate',function(){
+ var d=hs();
+ if(ign>0){
+  if(d===exp[0]){ign--;exp.shift();cur=d;if(!ign){if(tm){clearTimeout(tm);tm=null}if(dirty){dirty=false;rec()}}return}
+  ign=0;exp=[];dirty=false  /* a real Back arrived while a silent pop was pending: treat it as real */
+ }
+ cur=d;
+ if(!phone())return;
+ try{
+  if(!document.documentElement.classList.contains('wl-on')){
+   var v=st.view;
+   if(v==='sef'){go(d>=1?'st':'hub');return}
+   if(SEC.indexOf(v)>=0&&d===0){go('hub');return}
+  }
+  rec();
+ }catch(e){}
+});
+cur=hs();
+setTimeout(function(){try{rec()}catch(e){}},0); /* reload / restore while history says "deep": normalise silently */
+})();
+</script>
 <script>if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}</script>
 </body></html>
