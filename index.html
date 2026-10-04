@@ -397,6 +397,8 @@ html.wl-on #wl{display:block}
 @media screen{
 #thm{display:none}
 main#app[tabindex="-1"]:focus{outline:none}
+/* first heading of a tab sits the same distance under the header as the Dashboard cards (main already has 18px top padding) */
+main#app>h2:first-child{margin-top:0}
 .ap-seg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
 .ap-seg button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:56px;padding:6px 0;font-size:13px;line-height:1.2;letter-spacing:-.01em;text-align:center}
 .ap-seg button .ic{vertical-align:0}
@@ -877,7 +879,7 @@ function editSe(id){const s=data.settlements.find(x=>x.id===id);st.se={...s,amou
 async function delSe(id){if(!confirm('Delete '+id+'?'))return;data.settlements=data.settlements.filter(x=>x.id!==id);await save();render()}
 function vSt(){const r=inM(data.settlements).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:a.id<b.id?-1:1),pr=E.checkPairs(data.settlements).filter(p=>r.some(s=>s.pairId===p.pairId));
  return `<h2>Settlements</h2><div class="row"><button class="p" onclick="st.se=newSe();st.view='sef';render()">+ Add Settlement</button></div>
- ${pr.length?`<div class="box">${pr.map(p=>`<div class="pr">Pair ${esc(p.pairId)}: ${$$(p.total)} across ${p.count} rows \u2013 ${p.balanced?'<span class="OK tag">BALANCED</span>':'<span class="err tag">UNBALANCED</span>'}</div>`).join('')}</div>`:''}<br>`+
+ ${pr.length?`<div class="box">${pr.map(p=>`<div class="pr">Pair ${esc(p.pairId)}: ${$$(p.total)} across ${p.count} rows ${p.balanced?'<span class="OK tag">BALANCED</span>':'<span class="err tag">UNBALANCED</span>'}</div>`).join('')}</div>`:''}<br>`+
  tbl(['ID','Date','Type','From \u2192 To','Bucket','Amount','Paid By','Received','Pair',''],r.map(s=>[s.id,E.fmtDate(s.date),TYPES[s.type]||s.type,esc(s.debtor)+' \u2192 '+esc(s.originalCreditor)+(s.creditorFunds?' ('+esc(fundsLbl(s.creditorFunds))+')':''),BN[s.bucket]||'',$$(s.amount),s.paidByAccount,s.receiverAccount,esc(s.pairId),`<div class="acts"><button class="ib" title="Edit" aria-label="Edit ${s.id}" onclick="editSe('${s.id}')">${ic('edit',18)}</button><button class="ib d" title="Delete" aria-label="Delete ${s.id}" onclick="delSe('${s.id}')">${ic('trash',18)}</button></div>`]))}
 /* obligations, balances, budget */
 function vOb(){const r=E.buildObligations(data).filter(o=>o.month===st.month);
@@ -1026,7 +1028,7 @@ async function pushAll(){let c=false;const S=split();
 const synErr=e=>{sMsg=navigator.onLine?(e.code==='permission-denied'?'This account is not allowed':'Sync error: '+(e.message||e)):'Offline \u2013 will sync when back online'};
 function syncPush(){if(!suser||!fdb)return;sq=sq.then(pushAll).catch(synErr).then(ui)}
 function listen(){sunsub&&sunsub();sunsub=fdb.collection('months').onSnapshot(qs=>{if(qs.metadata.fromCache)return;sState='on';
- sq=sq.then(async()=>{for(const c of qs.docChanges())await pull(c.doc.id,c.type==='removed'?eM():fromDoc(c.doc.data()));await pushAll()}).catch(synErr).then(ui)},e=>{sState='err';synErr(e);ui()})}
+ sq=sq.then(async()=>{await syGuard(qs);for(const c of qs.docChanges())await pull(c.doc.id,c.type==='removed'?eM():fromDoc(c.doc.data()));await pushAll()}).catch(synErr).then(ui)},e=>{sState='err';synErr(e);ui()})}
 const syErr=e=>/invalid-credential|wrong-password|user-not-found|invalid-email/.test(e.code)?'Wrong email or password':e.code==='auth/network-request-failed'?'No connection \u2013 try again when online':e.code==='auth/too-many-requests'?'Too many attempts \u2013 wait a few minutes':(e.message||String(e));
 async function syIn(){sEmail=q('#sy-e').value.trim();const p=q('#sy-p').value;if(!sEmail||!p){sMsg='Enter email and password';return ui()}
  sMsg='Signing in\u2026';ui();try{await fbAuth.signInWithEmailAndPassword(sEmail,p);sMsg=''}catch(e){sMsg=syErr(e)}ui()}
@@ -1045,6 +1047,62 @@ async function fbInit(){if(fbAuth)return;if(!await loadFb()){sState='nofb';retur
  sState='off';fbAuth.onAuthStateChanged(u=>{suser=u;if(u){sState='connecting';sMsg='';listen()}else{sunsub&&sunsub();sunsub=null;sState='off'}ui()})}
 (async function(){try{sbase=(await kvGet('syncBase'))||{}}catch(e){}fbInit()})();
 addEventListener('online',()=>{if(!fbAuth)fbInit();else syncPush()});
+</script>
+<script>'use strict';
+/* Sync safety (additive). Does not change split/recon/one/push/pull/pushAll; syGuard() runs before each snapshot is merged.
+   1. First sync on a device with no sync history, local data and a non-empty cloud: download a JSON snapshot of the device first.
+   2. A local record that was never synced and has the same ID as a different incoming cloud record gets the next free ID (both are kept).
+      Also covers two phones adding the same ID while offline. Identical records are left alone.
+   3. Edit / Delete / Save refuse when an ID is used by more than one record, and offer a one-tap "Fix duplicate IDs". */
+let syGate=true,syFirstDone=false,syNote='';
+const cj=v=>v&&typeof v==='object'?(Array.isArray(v)?'['+v.map(cj).join(',')+']':'{'+Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+cj(v[k])).join(',')+'}'):JSON.stringify(v);
+const sameRec=(a,b)=>{try{return cj(JSON.parse(a))===cj(JSON.parse(b))}catch(e){return false}};
+const idNum=id=>parseInt(String(id).slice(1))||0,hasLocal=()=>!!(data.transactions.length||data.settlements.length||Object.keys(data.budgets||{}).length);
+const SYK=[['tx','transactions','T'],['se','settlements','S']];
+function syNoteAdd(t){syNote=(syNote?syNote+'\n':'')+t;if(syNote.length>700)syNote=syNote.slice(-700);kvPut('syncNote',syNote).catch(()=>{})}
+function syNoteClear(){syNote='';kvPut('syncNote','').catch(()=>{});ui()}
+kvGet('syncNote').then(v=>{if(v){syNote=v;ui()}}).catch(()=>{});
+function incoming(qs){const inc={tx:{},se:{}};for(const c of qs.docChanges()){if(c.type==='removed'||c.doc.id==='_settings')continue;let d;try{d=c.doc.data()}catch(e){continue}
+  for(const[k]of SYK)(d[k]||[]).forEach(s=>{try{const id=JSON.parse(s).id;(inc[k][id]=inc[k][id]||[]).push({m:c.doc.id,s})}catch(e){}})}return inc}
+function clash(inc){const ch=[];for(const[k,key,p]of SYK){let mx=0;data[key].forEach(x=>mx=Math.max(mx,idNum(x.id)));Object.keys(inc[k]).forEach(id=>mx=Math.max(mx,idNum(id)));
+  for(const x of data[key]){const R=inc[k][x.id];if(!R)continue;
+   if(((sbase[mo(x)]||{})[k]||{})[x.id]!==undefined)continue;                     /* already synced here: normal merge */
+   if(!R.some(r=>((sbase[r.m]||{})[k]||{})[x.id]===undefined))continue;            /* incoming one is an update of a known record */
+   if(R.some(r=>sameRec(r.s,JSON.stringify(x))))continue;                          /* identical record */
+   const nid=p+String(++mx).padStart(3,'0');ch.push({from:x.id,to:nid,date:x.date,what:x.description||x.type||''});x.id=nid}}return ch}
+async function syGuard(qs){
+ if(!syFirstDone){syFirstDone=true;
+  if(!Object.keys(sbase).length&&hasLocal()&&qs.docChanges().some(c=>c.type!=='removed')){
+   const f='ExTracker-before-first-sync-'+localDate(new Date())+'.json';
+   try{dl(f,E.exportJSON(data),'application/json');syNoteAdd('Before the first sync, a backup of this device\u2019s data was saved to your Downloads ('+f+'). Keep it until you have checked your data.')}catch(e){syNoteAdd('Could not download a backup before the first sync \u2013 please export one from Backup.')}}}
+ const ch=clash(incoming(qs));
+ if(ch.length){await afterChange();syNoteAdd(ch.length+' record'+(ch.length>1?'s':'')+' on this device had the same ID as a different cloud record and got new IDs (both are kept): '+ch.slice(0,6).map(c=>c.from+' \u2192 '+c.to).join(', ')+(ch.length>6?' \u2026':'')+'.');try{toast('Sync: '+ch.length+' record(s) got new IDs')}catch(e){}}
+ syGate=false}
+/* until the first snapshot has been checked, a device with no sync history and local data does not push */
+const _paG=pushAll;pushAll=async function(){if(syGate&&!Object.keys(sbase).length&&hasLocal())return;return _paG.apply(this,arguments)};
+/* duplicate IDs already on the device */
+function dupGroups(key){const g={};data[key].forEach(x=>(g[x.id]=g[x.id]||[]).push(x));return Object.entries(g).filter(([,a])=>a.length>1)}
+const dupCount=()=>SYK.reduce((n,[,key])=>n+dupGroups(key).length,0);
+function syFixDup(){let n=0,list=[];for(const[,key,p]of SYK){let mx=0;data[key].forEach(x=>mx=Math.max(mx,idNum(x.id)));
+  for(const[id,a]of dupGroups(key)){a.sort((x,y)=>(x.date||'')<(y.date||'')?-1:(x.date||'')>(y.date||'')?1:cj(x)<cj(y)?-1:1);
+   a.slice(1).forEach(x=>{const nid=p+String(++mx).padStart(3,'0');list.push(id+' \u2192 '+nid);x.id=nid;n++})}}
+ if(!n)return Promise.resolve(0);return save().then(()=>{syNoteAdd(n+' duplicate ID'+(n>1?'s':'')+' fixed: '+list.slice(0,6).join(', ')+(n>6?' \u2026':'')+'.');render();try{toast('Duplicate IDs fixed')}catch(e){}return n})}
+function dupBlock(key,id){const a=data[key].filter(x=>x.id===id);if(a.length<2)return false;
+ const ds=a.map(x=>E.fmtDate(x.date)).join(' and ');
+ if(confirm('ID '+id+' is used by '+a.length+' records ('+ds+'). Edit and Delete are blocked until this is fixed.\n\nFix now? The earliest-dated record keeps '+id+'; the others get new IDs. No data is removed.'))syFixDup();
+ return true}
+const _eT=editTx,_dT=delTx,_eS=editSe,_dS=delSe,_sT=saveTx,_sS=saveSe;
+editTx=function(id){if(dupBlock('transactions',id))return;return _eT.apply(this,arguments)};
+delTx=function(id){if(dupBlock('transactions',id))return;return _dT.apply(this,arguments)};
+editSe=function(id){if(dupBlock('settlements',id))return;return _eS.apply(this,arguments)};
+delSe=function(id){if(dupBlock('settlements',id))return;return _dS.apply(this,arguments)};
+saveTx=function(){const i=st.tx&&st.tx.id;if(i&&data.transactions.filter(x=>x.id===i).length>1){alert('ID '+i+' is used by more than one record, so saving is blocked. Cancel, then tap Edit or Delete on the record to fix the duplicate IDs.');return}return _sT.apply(this,arguments)};
+saveSe=function(){const i=st.se&&st.se.id;if(i&&data.settlements.filter(x=>x.id===i).length>1){alert('ID '+i+' is used by more than one record, so saving is blocked. Cancel, then tap Edit or Delete on the record to fix the duplicate IDs.');return}return _sS.apply(this,arguments)};
+/* show the note and the duplicate warning inside the Cloud Sync card (moved to Settings > Account by the Settings block) */
+const _vBk4=vBk;vBk=function(){let h=_vBk4.apply(this,arguments),x='';const d=dupCount();
+ if(syNote)x+=`<div class="syn" style="margin:12px 0 0"><p class="mut" style="white-space:pre-line;margin:0 0 8px">${esc(syNote)}</p><button type="button" onclick="syNoteClear()">Dismiss</button></div>`;
+ if(d)x+=`<div class="syn" style="margin:12px 0 0"><p class="err" style="margin:0 0 8px">${d} record ID${d>1?'s are':' is'} used more than once.</p><button type="button" onclick="syFixDup()">Fix duplicate IDs</button></div>`;
+ return x?h.replace('</div><h2>Export</h2>',()=>x+'</div><h2>Export</h2>'):h};
 </script>
 <script>'use strict';
 /* Presentation only (display classes, tab fade, Backup section order). Reads st.view; never writes data, calls no app functions. */
@@ -1138,6 +1196,22 @@ const _vBk3=vBk;vBk=function(){let h=_vBk3.apply(this,arguments),acc='';const a=
  return h.replace('<h2>Backup</h2>',()=>apHtml()+acc+'<h2>Backup</h2>')};
 /* if the first render ran before this script defined vBk (see the early guard script), draw the screen now */
 if(window.__exMiss){window.__exMiss=false;try{render()}catch(e){}}
+})();
+</script>
+<script>'use strict';
+/* Accessibility (additive): form controls get an accessible name, tapping a field label focuses its field, and the toast is announced.
+   Sets attributes only (no ids, no handlers, no data). */
+(function(){const app=document.getElementById('app');if(!app)return;
+const t=document.getElementById('toast');if(t){t.setAttribute('role','status');t.setAttribute('aria-live','polite')}
+function nameOf(c){let n=c.parentElement,lab='';for(let i=0;i<4&&n&&n!==app;i++,n=n.parentElement){const l=[...n.children].find(x=>x.tagName==='LABEL');if(l){lab=l.textContent.trim();break}}
+ const bx=c.closest('.box'),h=bx&&bx.querySelector('h3');if(lab&&h&&!lab.includes(h.textContent.trim()))lab+=' \u2013 '+h.textContent.trim();
+ if(!lab&&c.placeholder&&c.placeholder!=='0.00')lab=c.placeholder;
+ if(!lab&&c.tagName==='SELECT'&&c.options[0])lab=c.options[0].textContent.trim();
+ return lab}
+let raf=0;function run(){raf=0;app.querySelectorAll('input:not([type=file]):not([type=hidden]),select,textarea').forEach(c=>{if(c.hasAttribute('aria-label')||c.hasAttribute('aria-labelledby')||(c.labels&&c.labels.length))return;const n=nameOf(c);if(n)c.setAttribute('aria-label',n)})}
+new MutationObserver(()=>{if(!raf)raf=requestAnimationFrame(run)}).observe(app,{childList:true,subtree:true});run();
+app.addEventListener('click',e=>{const l=e.target&&e.target.closest&&e.target.closest('label');if(!l||l.htmlFor||l.querySelector('input,select,textarea')||!app.contains(l))return;
+ const c=l.parentElement&&l.parentElement.querySelector('input:not([type=file]),select,textarea');if(c)c.focus()});
 })();
 </script>
 <script>if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}</script>
