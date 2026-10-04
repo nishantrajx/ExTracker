@@ -1430,5 +1430,24 @@ async function run(){busy=true;const e=mk();e.classList.remove('drag');e.classLi
  else{lab(navigator.onLine===false?'Offline':'Could not sync');e.classList.remove('go');e.setAttribute('aria-hidden','false');hT=setTimeout(()=>{busy=false;hide()},2200)}}
 })();
 </script>
+<style>/* Round 4: equal-height boxes in the Add/Edit Transaction form, and a proper Share bar. Screen only; no variables redefined. */
+@media screen{
+.amt>input[oninput^="U('amountStr'"]{min-height:44px;padding:6px 12px 6px 28px;font-size:16px;font-weight:inherit;line-height:normal;letter-spacing:normal}
+.amt:has(>input[oninput^="U('amountStr'"])>span{left:13px;font-size:inherit;font-weight:inherit;line-height:1}
+.form input[oninput^="U('description'"],.form input[oninput^="U('notes'"]{min-height:44px;padding:6px 12px}
+.shr .bar{height:8px}
+.shr .bar i{border-radius:0 99px 99px 0;min-width:5px}
+.shr .bar i[style*="width:0.0%"]{min-width:0}
+}
+@media screen and (max-width:640px){
+.cv td:has(>.shr),
+.cv:not(.tc):not(.k2) tbody tr:has(>td:first-child:is([data-l=Card],[data-l=Payer],[data-l=Bucket],[data-l=Account],[data-l=Creditor]))>td:has(>.shr){display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:12px;row-gap:6px;align-items:center;justify-content:stretch}
+.cv td:has(>.shr)::before,
+.cv:not(.tc):not(.k2) tbody tr:has(>td:first-child:is([data-l=Card],[data-l=Payer],[data-l=Bucket],[data-l=Account],[data-l=Creditor]))>td:has(>.shr)::before{grid-row:1;grid-column:1}
+.cv td>.shr{display:contents}
+.cv td>.shr>.pc{grid-row:1;grid-column:2;min-width:0}
+.cv td>.shr>.bar{grid-row:2;grid-column:1/-1;min-width:0;width:100%}
+}
+</style>
 <script>if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}</script>
 </body></html>
